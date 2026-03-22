@@ -127,6 +127,12 @@ export default function AnimatedCppCode({ speed = 50 }: AnimatedCppCodeProps) {
         setVisibleTokenCount((prev) => prev + 1);
       }, speed);
       return () => clearTimeout(timer);
+    } else {
+      // After full code is shown, pause then restart
+      const restartTimer = setTimeout(() => {
+        setVisibleTokenCount(0);
+      }, 3000); // 3 second pause before restart
+      return () => clearTimeout(restartTimer);
     }
   }, [visibleTokenCount, speed]);
 
