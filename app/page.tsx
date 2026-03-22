@@ -285,6 +285,8 @@ export default function Home() {
         <p className="mt-2">
           <a href="https://github.com/javiersiliacay" target="_blank" rel="noopener noreferrer" className="hover:text-primary-400 transition-colors">GitHub</a>
           {' • '}
+          <a href="https://www.facebook.com/siliacayjavier/" target="_blank" rel="noopener noreferrer" className="hover:text-primary-400 transition-colors">Facebook</a>
+          {' • '}
           <a href="mailto:siliacay.javier@gmail.com" className="hover:text-primary-400 transition-colors">Email</a>
         </p>
       </footer>
