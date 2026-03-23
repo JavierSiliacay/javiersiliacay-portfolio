@@ -44,10 +44,8 @@ export default function Chatbot() {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://javiersiliacay-portfolio.vercel.app", 
-          "X-Title": "Javier Siliacay Portfolio"
+          "Authorization": `Bearer ${apiKey.trim()}`,
         },
         body: JSON.stringify({
           model: model,
@@ -55,34 +53,22 @@ export default function Chatbot() {
           messages: [
             {
               role: "system",
-              content: `You are Javier Siliacay AI Support. 
-Answer visitor questions only about Javier Siliacay, his identity, technical skills, projects, and credentials.
-
-Context:
-- Location: Cagayan de Oro, Philippines.
-- Education: B.S. Autotronics at USTP.
-- Specialization: Embedded Systems, IoT, Full-Stack Development.
-- Skills: TypeScript, Next.js, Arduino, ESP32, Python, MQTT, C/C++, AI Integration.
-- Projects: autoworx-system, CircuitoAI, tarafix.
-
-Rules:
-- Strictly plain text only. No symbols, markdown, or special characters.
-- Stay strictly within Javier's verified background.
-- If out of scope: "I’m here to answer questions specifically about Javier Siliacay and his verified credentials."`
+              content: "You are Javier Siliacay AI Support. Answer as Javier. Use plain text only. No symbols. Stay professional."
             },
-            ...messages.slice(-10),
+            ...messages.slice(-6),
             userMessage
           ]
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error("OpenRouter Error:", response.status, errorData);
-        throw new Error(`Connection failed: ${response.status}`);
+        const errText = await response.text();
+        console.error("AI Error:", errText);
+        throw new Error(`API Error: ${response.status}`);
       }
+
       const reader = response.body?.getReader();
-      if (!reader) throw new Error("No stream");
+      if (!reader) throw new Error("Stream error");
 
       const decoder = new TextDecoder();
       let assistantContent = "";
@@ -92,10 +78,12 @@ Rules:
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+
         const chunk = decoder.decode(value);
-        const lines = chunk.split("\n").filter(line => line.trim() !== "");
+        const lines = chunk.split("\n");
+
         for (const line of lines) {
-          if (line.includes("data: [DONE]")) continue;
+          if (!line.trim() || line.includes("data: [DONE]")) continue;
           if (line.startsWith("data: ")) {
             try {
               const data = JSON.parse(line.slice(6));
@@ -112,9 +100,9 @@ Rules:
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat Error:", error);
-      setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I had trouble connecting. Please try again." }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: `System Error: ${error.message}` }]);
     } finally {
       setIsLoading(false);
     }
