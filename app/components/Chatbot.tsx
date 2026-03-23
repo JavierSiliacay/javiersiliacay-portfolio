@@ -38,39 +38,75 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/javiersiliacay-portfolio/api/chat", {
+      const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+      const model = process.env.NEXT_PUBLIC_CHATBOT_MODEL || "stepfun/step-3.5-flash:free";
+
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, userMessage].slice(-10) }),
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://javiersiliacay-portfolio.vercel.app", 
+          "X-Title": "Javier Siliacay Portfolio"
+        },
+        body: JSON.stringify({
+          model: model,
+          stream: true,
+          messages: [
+            {
+              role: "system",
+              content: `You are Javier Siliacay AI Support. 
+Answer visitor questions only about Javier Siliacay, his identity, technical skills, projects, and credentials.
+
+Context:
+- Location: Cagayan de Oro, Philippines.
+- Education: B.S. Autotronics at USTP.
+- Specialization: Embedded Systems, IoT, Full-Stack Development.
+- Skills: TypeScript, Next.js, Arduino, ESP32, Python, MQTT, C/C++, AI Integration.
+- Projects: autoworx-system, CircuitoAI, tarafix.
+
+Rules:
+- Strictly plain text only. No symbols, markdown, or special characters.
+- Stay strictly within Javier's verified background.
+- If out of scope: "I’m here to answer questions specifically about Javier Siliacay and his verified credentials."`
+            },
+            ...messages.slice(-10),
+            userMessage
+          ]
+        }),
       });
 
-      if (!response.ok) throw new Error("Failed to connect to AI");
-      if (!response.body) throw new Error("No response body");
+      if (!response.ok) throw new Error("Connection failed");
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No stream");
 
-      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let assistantContent = "";
-
-      // Add placeholder assistant message
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
-      setIsLoading(false); // Stop showing the loading spinner, start streaming
+      setIsLoading(false);
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value);
-        assistantContent += chunk;
-
-        // Update the last message (the assistant's content)
-        setMessages((prev) => {
-          const newMessages = [...prev];
-          newMessages[newMessages.length - 1] = { 
-            role: "assistant", 
-            content: assistantContent 
-          };
-          return newMessages;
-        });
+        const lines = chunk.split("\n").filter(line => line.trim() !== "");
+        for (const line of lines) {
+          if (line.includes("data: [DONE]")) continue;
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              const content = data.choices[0]?.delta?.content || "";
+              if (content) {
+                assistantContent += content;
+                setMessages((prev) => {
+                  const newMsgs = [...prev];
+                  newMsgs[newMsgs.length - 1].content = assistantContent;
+                  return newMsgs;
+                });
+              }
+            } catch (e) {}
+          }
+        }
       }
     } catch (error) {
       console.error("Chat Error:", error);
