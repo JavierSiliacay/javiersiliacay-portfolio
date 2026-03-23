@@ -38,7 +38,7 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || "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";
       const model = process.env.NEXT_PUBLIC_CHATBOT_MODEL || "stepfun/step-3.5-flash:free";
 
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -76,7 +76,11 @@ Rules:
         }),
       });
 
-      if (!response.ok) throw new Error("Connection failed");
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("OpenRouter Error:", response.status, errorData);
+        throw new Error(`Connection failed: ${response.status}`);
+      }
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No stream");
 
