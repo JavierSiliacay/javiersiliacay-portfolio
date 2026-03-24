@@ -39,25 +39,15 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || "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";
-      const model = process.env.NEXT_PUBLIC_CHATBOT_MODEL || "stepfun/step-3.5-flash:free";
-
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const response = await fetch("/javiersiliacay-portfolio/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey.trim()}`,
         },
         body: JSON.stringify({
-          model: model,
-          stream: true,
           messages: [
-            {
-              role: "system",
-              content: "You are Javier Siliacay AI Support. Answer as Javier. Use plain text only. No symbols. Stay professional."
-            },
-            ...messages.slice(-6),
-            userMessage
+            ...messages.slice(-6).map(m => ({ role: m.role, content: m.content })),
+            { role: "user", content: input }
           ]
         }),
       });
@@ -80,25 +70,14 @@ export default function Chatbot() {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (!line.trim() || line.includes("data: [DONE]")) continue;
-          if (line.startsWith("data: ")) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              const content = data.choices[0]?.delta?.content || "";
-              if (content) {
-                assistantContent += content;
-                setMessages((prev) => {
-                  const newMsgs = [...prev];
-                  newMsgs[newMsgs.length - 1].content = assistantContent;
-                  return newMsgs;
-                });
-              }
-            } catch (e) {}
-          }
+        const content = decoder.decode(value);
+        if (content) {
+          assistantContent += content;
+          setMessages((prev) => {
+            const newMsgs = [...prev];
+            newMsgs[newMsgs.length - 1].content = assistantContent;
+            return newMsgs;
+          });
         }
       }
     } catch (error: unknown) {

@@ -2,18 +2,20 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const messages = body.messages || [];
     const apiKey = process.env.OPENROUTER_API_KEY;
     const model = process.env.CHATBOT_MODEL || "stepfun/step-3.5-flash:free";
 
     if (!apiKey) {
-      return NextResponse.json({ error: "Missing API Key" }, { status: 500 });
+      console.error("Error: OPENROUTER_API_KEY is missing from environment variables.");
+      return NextResponse.json({ error: "Missing API Key configuration" }, { status: 500 });
     }
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        "Authorization": `Bearer ${apiKey.trim()}`,
         "HTTP-Referer": "https://javiersiliacay-portfolio.vercel.app", // Optional, for OpenRouter rankings
         "X-Title": "Javier Siliacay Portfolio", // Optional
         "Content-Type": "application/json"
@@ -50,6 +52,15 @@ Strict Boundaries:
         ]
       })
     });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("OpenRouter Error:", errorData);
+      return NextResponse.json(
+        { error: errorData.error?.message || "OpenRouter API error" },
+        { status: response.status }
+      );
+    }
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -94,8 +105,8 @@ Strict Boundaries:
     });
 
     return new Response(stream);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Chat API Error:", error);
-    return NextResponse.json({ error: "Failed to process chat" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Failed to process chat" }, { status: 500 });
   }
 }
