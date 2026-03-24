@@ -49,8 +49,11 @@ export default function MultimodalVision() {
 
     scripts.forEach(src => {
       const s = document.createElement("script");
-      s.src = src; s.async = true;
+      s.src = src; 
+      s.async = true;
+      s.crossOrigin = "anonymous";
       s.onload = loadHandler;
+      s.onerror = (e) => console.error("Script load error:", src, e);
       document.head.appendChild(s);
     });
   }, []);
@@ -65,15 +68,30 @@ export default function MultimodalVision() {
     if (isVisionModeOn && !isActive && videoRef.current) {
       navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
         .then(s => { 
-          if (videoRef.current) { videoRef.current.srcObject = s; streamRef.current = s; videoRef.current.play(); setIsActive(true); }
+          if (videoRef.current) { 
+            videoRef.current.srcObject = s; 
+            streamRef.current = s; 
+            videoRef.current.onloadedmetadata = () => {
+              videoRef.current?.play(); 
+              setIsActive(true); 
+              console.log("Camera Stream Started");
+            };
+          }
         })
-        .catch(() => setIsVisionModeOn(false));
+        .catch(err => {
+          console.error("Camera access denied:", err);
+          setIsVisionModeOn(false);
+        });
     }
   }, [isVisionModeOn, isActive]);
 
   useEffect(() => {
-    if (!libsReady || !window.Hands || !window.FaceMesh) return;
+    if (!libsReady || !window.Hands || !window.FaceMesh) {
+      if (libsReady) console.warn("MediaPipe libraries linked but classes not found on window");
+      return;
+    }
 
+    console.log("Initializing MediaPipe Models...");
     const hands = new window.Hands({
       locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
     });
@@ -88,7 +106,12 @@ export default function MultimodalVision() {
     faceMesh.onResults((res: any) => handleFace(res));
     faceMeshRef.current = faceMesh;
 
-    return () => { hands.close(); faceMesh.close(); };
+    setGesture("System Ready");
+
+    return () => { 
+      if (hands) hands.close(); 
+      if (faceMesh) faceMesh.close(); 
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [libsReady]);
 
@@ -99,8 +122,8 @@ export default function MultimodalVision() {
       const landmarks = results.multiHandLandmarks[0];
       const indexTip = landmarks[8];
       
-      window.drawConnectors(ctx, landmarks, window.HAND_CONNECTIONS, { color: "rgba(245,158,11,0.2)", lineWidth: 2 });
-      window.drawLandmarks(ctx, landmarks, { color: "#fbbf24", lineWidth: 1, radius: 1 });
+      if (window.drawConnectors) window.drawConnectors(ctx, landmarks, window.HAND_CONNECTIONS, { color: "rgba(245,158,11,0.2)", lineWidth: 2 });
+      if (window.drawLandmarks) window.drawLandmarks(ctx, landmarks, { color: "#fbbf24", lineWidth: 1, radius: 1 });
 
       if (indexTip.y < 0.3) { window.scrollBy(0, -25); setGesture("Scrolling Up"); }
       else if (indexTip.y > 0.7) { window.scrollBy(0, 25); setGesture("Scrolling Down"); }
@@ -122,7 +145,7 @@ export default function MultimodalVision() {
       const landmarks = results.multiFaceLandmarks[0];
       
       ctx.save();
-      window.drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, 
+      if (window.drawConnectors) window.drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, 
         { color: "rgba(255, 255, 255, 0.2)", lineWidth: 0.5 });
       
       const keypoints = [
@@ -159,12 +182,16 @@ export default function MultimodalVision() {
     let anim: number;
     const loop = async () => {
       if (isActive && videoRef.current?.readyState === 4) {
-        if (canvasRef.current) {
-          const ctx = canvasRef.current.getContext("2d")!;
-          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        try {
+          if (canvasRef.current) {
+            const ctx = canvasRef.current.getContext("2d")!;
+            ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          }
+          if (handsRef.current) await handsRef.current.send({ image: videoRef.current });
+          if (faceMeshRef.current) await faceMeshRef.current.send({ image: videoRef.current });
+        } catch (err) {
+          console.error("Vision Process Error:", err);
         }
-        if (handsRef.current) await handsRef.current.send({ image: videoRef.current });
-        if (faceMeshRef.current) await faceMeshRef.current.send({ image: videoRef.current });
       }
       anim = requestAnimationFrame(loop);
     };
