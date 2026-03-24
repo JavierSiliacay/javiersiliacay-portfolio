@@ -91,7 +91,7 @@ export default function Hero() {
             <div className="absolute inset-0 bg-primary-500/5 -z-10" />
             
             <Image 
-              src="/javiersiliacay-portfolio/javier.png" 
+              src="/javier.png" 
               alt="Javier Siliacay"
               fill
               className="object-cover transition-all duration-700 group-hover:scale-110 brightness-[1.05] contrast-[1.05]"

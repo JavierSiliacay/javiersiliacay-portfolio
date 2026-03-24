@@ -39,7 +39,7 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/javiersiliacay-portfolio/api/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
