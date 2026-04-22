@@ -35,6 +35,28 @@ export default function HighFidelityVisionDemo() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const spiritBombAudioRef = useRef<HTMLAudioElement | null>(null);
+  const kamehamehaAudioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Kamehameha Charge Tracking
+  const kamehamehaChargeRef = useRef<number>(0);
+  const lastKamehamehaActiveRef = useRef<number>(0);
+
+  // Initialize Audios
+  useEffect(() => {
+    const sbaudio = new Audio("/spiritbomb.mp3");
+    sbaudio.loop = true;
+    spiritBombAudioRef.current = sbaudio;
+
+    const kaudio = new Audio("/kamekameha.mp3");
+    kaudio.loop = true;
+    kamehamehaAudioRef.current = kaudio;
+    
+    return () => {
+      sbaudio.pause();
+      kaudio.pause();
+    };
+  }, []);
 
   useEffect(() => {
     let handDetector: handPoseDetectionTypes.HandDetector | null = null;
@@ -162,6 +184,9 @@ export default function HighFidelityVisionDemo() {
         // 0. RENDER BACKGROUND POSES (Generic body detection)
         // ==========================================================
         const skeletonEdges = poseDetection.util.getAdjacentPairs(poseDetection.SupportedModels.MoveNet);
+        
+        let isAnySpiritBombActive = false;
+
         safePoses.forEach((pose: poseDetectionTypes.Pose) => {
            ctx.shadowBlur = 10;
            ctx.shadowColor = "#ff00ff";
@@ -238,6 +263,7 @@ export default function HighFidelityVisionDemo() {
            if ((leftWrist.score || 0) > 0.4 && (rightWrist.score || 0) > 0.4 && (nose.score || 0) > 0.4) {
              // In Canvas, Y goes DOWN. So if wrists are LESS than nose, arms are in the air!
              if (leftWrist.y < nose.y - 40 && rightWrist.y < nose.y - 40) {
+               isAnySpiritBombActive = true;
                
                // Center the massive bomb between the two raised hands
                const cx = (leftWrist.x + rightWrist.x) / 2;
@@ -278,6 +304,7 @@ export default function HighFidelityVisionDemo() {
              }
            }
         });
+
 
         // ==========================================================
         // 1. RENDER HANDS (Palm contours, full finger tracing)
@@ -332,13 +359,14 @@ export default function HighFidelityVisionDemo() {
         // ==========================================================
         // 1.5 DBZ KAMEHAMEHA EASTER EGG (Two-Hand Interaction)
         // ==========================================================
+        let kamehamehaThisFrame = false;
+
         if (safeHands.length >= 2) {
           for (let i = 0; i < safeHands.length; i++) {
             for (let j = i + 1; j < safeHands.length; j++) {
               const h1 = safeHands[i];
               const h2 = safeHands[j];
               
-              // Point 9 is the center of the palm base
               const p1 = h1.keypoints[9];
               const p2 = h2.keypoints[9];
               
@@ -346,48 +374,117 @@ export default function HighFidelityVisionDemo() {
 
               const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
               
-              // If palms are brought directly together... CHARGE IT UP!
-              if (dist < 200) { 
+              if (dist < 220) { 
+                kamehamehaThisFrame = true;
+                const now = Date.now();
+                lastKamehamehaActiveRef.current = now;
+                
+                // Accumulate charge while hands are close
+                kamehamehaChargeRef.current = Math.min(1, kamehamehaChargeRef.current + 0.008);
+                const charge = kamehamehaChargeRef.current;
+
                 const cx = (p1.x + p2.x) / 2;
                 const cy = (p1.y + p2.y) / 2;
                 
-                // The closer the hands, the bigger the ball gets!
-                const time = Date.now();
-                const pulse = Math.sin(time / 60) * 15; // Fast strobe
-                const chargeScale = (200 - dist) * 0.8; // Grow as hands close
-                const radius = Math.max(30, 40 + pulse + chargeScale);
+                const time = now;
+                const pulse = Math.sin(time / 50) * (10 + charge * 30); // Pulse intensifies
+                const chargeScale = (220 - dist) * 0.7; 
                 
-                // Extreme Neon Strobe effect
-                ctx.shadowBlur = 100 + pulse * 2;
-                ctx.shadowColor = "#00ffff"; // Blinding cyan glow
+                // Radius evolves with charge: 40px -> 250px
+                const radius = Math.max(30, 40 + pulse + chargeScale + (charge * 180));
                 
-                // Draw inner plasma core
-                const gradient = ctx.createRadialGradient(cx, cy, radius * 0.1, cx, cy, radius);
-                gradient.addColorStop(0, "rgba(255, 255, 255, 1)"); // Supernova white core
-                gradient.addColorStop(0.2, "rgba(100, 255, 255, 0.9)"); // Hot cyan
-                gradient.addColorStop(0.6, "rgba(0, 200, 255, 0.6)"); 
-                gradient.addColorStop(1, "rgba(0, 150, 255, 0)"); // Dissipate
+                // 1. SCREEN SHAKE (Extreme state)
+                if (charge > 0.7) {
+                  ctx.save();
+                  const shake = (charge - 0.7) * 20;
+                  ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+                }
+
+                // 2. ENERGY GATHERING RINGS (Sucking energy into the core)
+                if (charge > 0.05) {
+                  ctx.strokeStyle = `rgba(100, 255, 255, ${0.2 + charge * 0.5})`;
+                  ctx.lineWidth = 2 + charge * 4;
+                  for (let k = 0; k < 4; k++) {
+                    const ringTime = (time / (1200 - k * 150)) % 1;
+                    const ringRad = radius * (3 - ringTime * 2.8);
+                    if (ringRad > radius * 0.2) {
+                      ctx.beginPath();
+                      ctx.arc(cx, cy, ringRad, 0, Math.PI * 2);
+                      ctx.stroke();
+                    }
+                  }
+                }
+
+                // 3. MAIN PLASMA CORE
+                ctx.shadowBlur = 40 + charge * 100 + pulse;
+                ctx.shadowColor = charge > 0.8 ? "#ffffff" : "#00ffff"; 
+                
+                const gradient = ctx.createRadialGradient(cx, cy, radius * 0.05, cx, cy, radius);
+                gradient.addColorStop(0, "rgba(255, 255, 255, 1)"); 
+                gradient.addColorStop(0.1 + charge * 0.1, `rgba(${255 - charge * 155}, 255, 255, 1)`); 
+                gradient.addColorStop(0.5, `rgba(0, ${150 + charge * 105}, 255, 0.8)`); 
+                gradient.addColorStop(1, "rgba(0, 50, 255, 0)"); 
                 
                 ctx.beginPath();
                 ctx.fillStyle = gradient;
                 ctx.arc(cx, cy, radius, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Add chaotic plasma lightning arcs ripping around the sphere
+                // 4. CHAOTIC LIGHTNING (Intensity increases with charge)
+                const lightningCount = Math.floor(4 + charge * 12);
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-                ctx.shadowBlur = 10;
-                for (let k = 0; k < 6; k++) {
-                  ctx.lineWidth = Math.random() * 3 + 1;
+                for (let k = 0; k < lightningCount; k++) {
+                  ctx.lineWidth = Math.random() * (1 + charge * 4);
                   ctx.beginPath();
                   const angle1 = Math.random() * Math.PI * 2;
-                  const angle2 = angle1 + (Math.random() * 1.5);
-                  const arcRad = radius + (Math.random() * 30);
+                  const angle2 = angle1 + (Math.random() * (0.5 + charge));
+                  const arcRad = radius + (Math.random() * (20 + charge * 60));
                   ctx.arc(cx, cy, arcRad, angle1, angle2);
                   ctx.stroke();
                 }
                 
-                ctx.shadowBlur = 0; // Reset for face mesh
+                // 5. MAX CHARGE FLASH
+                if (charge > 0.95 && Math.random() > 0.8) {
+                  ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+                  ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
+                if (charge > 0.7) ctx.restore();
+                
+                ctx.shadowBlur = 0;
               }
+            }
+          }
+        }
+
+        // Decay charge if no hands are together
+        if (!kamehamehaThisFrame && Date.now() - lastKamehamehaActiveRef.current > 150) {
+          kamehamehaChargeRef.current = Math.max(0, kamehamehaChargeRef.current - 0.03);
+        }
+
+        // Audio control logic
+        if (spiritBombAudioRef.current) {
+          if (isAnySpiritBombActive) {
+            if (spiritBombAudioRef.current.paused) {
+              spiritBombAudioRef.current.play().catch(e => console.warn("Spirit Bomb Audio play failed:", e));
+            }
+          } else {
+            if (!spiritBombAudioRef.current.paused) {
+              spiritBombAudioRef.current.pause();
+              spiritBombAudioRef.current.currentTime = 0;
+            }
+          }
+        }
+
+        if (kamehamehaAudioRef.current) {
+          if (kamehamehaThisFrame) {
+            if (kamehamehaAudioRef.current.paused) {
+              kamehamehaAudioRef.current.play().catch(e => console.warn("Kamehameha Audio play failed:", e));
+            }
+          } else {
+            if (!kamehamehaAudioRef.current.paused) {
+              kamehamehaAudioRef.current.pause();
+              kamehamehaAudioRef.current.currentTime = 0;
             }
           }
         }
