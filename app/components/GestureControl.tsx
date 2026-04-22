@@ -112,7 +112,6 @@ export default function MultimodalVision() {
       if (hands) hands.close(); 
       if (faceMesh) faceMesh.close(); 
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [libsReady]);
 
   const handleHands = (results: any) => {

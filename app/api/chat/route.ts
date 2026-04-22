@@ -105,6 +105,7 @@ Strict Boundaries:
     });
 
     return new Response(stream);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Chat API Error:", error);
     return NextResponse.json({ error: error.message || "Failed to process chat" }, { status: 500 });

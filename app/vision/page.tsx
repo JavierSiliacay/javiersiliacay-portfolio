@@ -6,17 +6,26 @@ import type * as faceLandmarksDetectionTypes from "@tensorflow-models/face-landm
 import type * as poseDetectionTypes from "@tensorflow-models/pose-detection";
 
 // Bypass Next.js SSR and ESM resolution issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let tf: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let handPoseDetection: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let faceLandmarksDetection: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let poseDetection: any = null;
 
 if (typeof window !== "undefined") {
   // Use pure require for all TF modules to prevent Turbopack from mixing ESM/CJS and double-registering WebGL
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   tf = require("@tensorflow/tfjs-core");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require("@tensorflow/tfjs-backend-webgl");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   handPoseDetection = require("@tensorflow-models/hand-pose-detection/dist/index.js");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   faceLandmarksDetection = require("@tensorflow-models/face-landmarks-detection/dist/index.js");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   poseDetection = require("@tensorflow-models/pose-detection/dist/index.js");
 }
 
@@ -96,6 +105,7 @@ export default function HighFidelityVisionDemo() {
         await setupCamera();
         setIsLoaded(true);
         detectFeatures();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         console.error(e);
         setError("Failed to load precision models. Ensure camera permissions.");
@@ -414,6 +424,7 @@ export default function HighFidelityVisionDemo() {
            });
         });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Frame processing error:", err);
         setError("AI Crash: " + (err.message || String(err)));
@@ -426,14 +437,17 @@ export default function HighFidelityVisionDemo() {
 
     initDetectors();
 
+    // Store the video element reference so cleanup is robust
+    const currentVideo = videoRef.current;
+
     // Cleanup on unmount
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       if (handDetector) handDetector.dispose();
       if (faceDetector) faceDetector.dispose();
       if (poseDetector) poseDetector.dispose();
-      if (videoRef.current && videoRef.current.srcObject) {
-         const stream = videoRef.current.srcObject as MediaStream;
+      if (currentVideo && currentVideo.srcObject) {
+         const stream = currentVideo.srcObject as MediaStream;
          stream.getTracks().forEach((track) => track.stop());
       }
     };
