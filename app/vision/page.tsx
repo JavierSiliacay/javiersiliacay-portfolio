@@ -37,7 +37,7 @@ export default function HighFidelityVisionDemo() {
   const [error, setError] = useState<string | null>(null);
   const spiritBombAudioRef = useRef<HTMLAudioElement | null>(null);
   const kamehamehaAudioRef = useRef<HTMLAudioElement | null>(null);
-  
+
   // Kamehameha Charge Tracking
   const kamehamehaChargeRef = useRef<number>(0);
   const lastKamehamehaActiveRef = useRef<number>(0);
@@ -51,7 +51,7 @@ export default function HighFidelityVisionDemo() {
     const kaudio = new Audio("/kamekameha.mp3");
     kaudio.loop = true;
     kamehamehaAudioRef.current = kaudio;
-    
+
     return () => {
       sbaudio.pause();
       kaudio.pause();
@@ -76,7 +76,7 @@ export default function HighFidelityVisionDemo() {
         audio: false,
         video: {
           facingMode: "user",
-          width: { ideal: 1280 }, 
+          width: { ideal: 1280 },
           height: { ideal: 720 },
         },
       });
@@ -109,7 +109,7 @@ export default function HighFidelityVisionDemo() {
           faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
           {
             runtime: 'tfjs',
-            refineLandmarks: true, 
+            refineLandmarks: true,
             maxFaces: 6,
           }
         );
@@ -127,7 +127,7 @@ export default function HighFidelityVisionDemo() {
         await setupCamera();
         setIsLoaded(true);
         detectFeatures();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         console.error(e);
         setError("Failed to load precision models. Ensure camera permissions.");
@@ -137,7 +137,7 @@ export default function HighFidelityVisionDemo() {
     const detectFeatures = async () => {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      
+
       if (!video || !canvas || !handDetector || !faceDetector || video.readyState < 2) {
         animationFrameId = requestAnimationFrame(detectFeatures);
         return;
@@ -161,7 +161,7 @@ export default function HighFidelityVisionDemo() {
           faceDetector.estimateFaces(video, { flipHorizontal: false }),
           poseDetector!.estimatePoses(video, { flipHorizontal: false })
         ]);
-        
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const safeHands = hands || [];
@@ -184,125 +184,125 @@ export default function HighFidelityVisionDemo() {
         // 0. RENDER BACKGROUND POSES (Generic body detection)
         // ==========================================================
         const skeletonEdges = poseDetection.util.getAdjacentPairs(poseDetection.SupportedModels.MoveNet);
-        
+
         let isAnySpiritBombActive = false;
 
         safePoses.forEach((pose: poseDetectionTypes.Pose) => {
-           ctx.shadowBlur = 10;
-           ctx.shadowColor = "#ff00ff";
-           ctx.strokeStyle = "rgba(255, 0, 255, 0.8)";
-           ctx.lineWidth = 3;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = "#ff00ff";
+          ctx.strokeStyle = "rgba(255, 0, 255, 0.8)";
+          ctx.lineWidth = 3;
 
-           // 1. Draw Sci-Fi Head Targeting Box instead of the ugly facial "W" line
-           const faceKps = pose.keypoints.slice(0, 5);
-           const validFaceKps = faceKps.filter(kp => (kp.score || 0) > 0.3);
-           
-           if (validFaceKps.length >= 2) { 
-             const minX = Math.min(...validFaceKps.map(k => k.x));
-             const maxX = Math.max(...validFaceKps.map(k => k.x));
-             const minY = Math.min(...validFaceKps.map(k => k.y));
-             const maxY = Math.max(...validFaceKps.map(k => k.y));
-             
-             // Dynamically expand box slightly around the detected facial features
-             const w = Math.max(40, (maxX - minX) * 1.8);
-             const h = Math.max(40, (maxY - minY) * 2.2);
-             const cx = minX + (maxX - minX) / 2;
-             const cy = minY + (maxY - minY) / 2;
-             const bx = cx - w / 2;
-             const by = cy - h / 2 - (h * 0.1); // Shift up slightly for forehead
-             
-             // Draw targeting brackets [ ] around the head
-             const cr = Math.min(w, h) * 0.25; // Corner bracket length
-             ctx.beginPath();
-             // Top Left
-             ctx.moveTo(bx + cr, by); ctx.lineTo(bx, by); ctx.lineTo(bx, by + cr);
-             // Top Right
-             ctx.moveTo(bx + w - cr, by); ctx.lineTo(bx + w, by); ctx.lineTo(bx + w, by + cr);
-             // Bottom Left
-             ctx.moveTo(bx + cr, by + h); ctx.lineTo(bx, by + h); ctx.lineTo(bx, by + h - cr);
-             // Bottom Right
-             ctx.moveTo(bx + w - cr, by + h); ctx.lineTo(bx + w, by + h); ctx.lineTo(bx + w, by + h - cr);
-             ctx.stroke();
-           }
+          // 1. Draw Sci-Fi Head Targeting Box instead of the ugly facial "W" line
+          const faceKps = pose.keypoints.slice(0, 5);
+          const validFaceKps = faceKps.filter(kp => (kp.score || 0) > 0.3);
 
-           // 2. Draw Body Joints (excluding redundant face dots)
-           ctx.fillStyle = "#ff00ff";
-           pose.keypoints.forEach((kp, index) => {
-             if (index < 5) return; // Skip face tracking points to keep mesh clean
-             if ((kp.score || 0) > 0.4) {
-               ctx.beginPath();
-               ctx.arc(kp.x, kp.y, 4, 0, 2 * Math.PI);
-               ctx.fill();
-             }
-           });
-           
-           // 3. Draw Body Bones (excluding the messy "W" facial connections)
-           ctx.lineWidth = 4;
-           ctx.beginPath();
-           skeletonEdges.forEach(([i, j]: number[]) => {
-             if (i < 5 && j < 5) return; // Completely mute facial lines
-             
-             const kp1 = pose.keypoints[i];
-             const kp2 = pose.keypoints[j];
-             if ((kp1.score || 0) > 0.35 && (kp2.score || 0) > 0.35) {
-               ctx.moveTo(kp1.x, kp1.y);
-               ctx.lineTo(kp2.x, kp2.y);
-             }
-           });
-           ctx.stroke();
-           
-           ctx.shadowBlur = 0;
+          if (validFaceKps.length >= 2) {
+            const minX = Math.min(...validFaceKps.map(k => k.x));
+            const maxX = Math.max(...validFaceKps.map(k => k.x));
+            const minY = Math.min(...validFaceKps.map(k => k.y));
+            const maxY = Math.max(...validFaceKps.map(k => k.y));
 
-           // ==========================================================
-           // 4. DBZ SPIRIT BOMB EASTER EGG (Arms Raised to the Sky!)
-           // ==========================================================
-           const leftWrist = pose.keypoints[9];
-           const rightWrist = pose.keypoints[10];
-           const nose = pose.keypoints[0];
+            // Dynamically expand box slightly around the detected facial features
+            const w = Math.max(40, (maxX - minX) * 1.8);
+            const h = Math.max(40, (maxY - minY) * 2.2);
+            const cx = minX + (maxX - minX) / 2;
+            const cy = minY + (maxY - minY) / 2;
+            const bx = cx - w / 2;
+            const by = cy - h / 2 - (h * 0.1); // Shift up slightly for forehead
 
-           if ((leftWrist.score || 0) > 0.4 && (rightWrist.score || 0) > 0.4 && (nose.score || 0) > 0.4) {
-             // In Canvas, Y goes DOWN. So if wrists are LESS than nose, arms are in the air!
-             if (leftWrist.y < nose.y - 40 && rightWrist.y < nose.y - 40) {
-               isAnySpiritBombActive = true;
-               
-               // Center the massive bomb between the two raised hands
-               const cx = (leftWrist.x + rightWrist.x) / 2;
-               const cy = Math.min(leftWrist.y, rightWrist.y) - 60; // Float slightly above the hands
-               
-               const time = Date.now();
-               const pulse = Math.sin(time / 150) * 30; // Slow, massive throb
-               const altitudeBonus = Math.max(0, nose.y - Math.max(leftWrist.y, rightWrist.y));
-               
-               // The higher they reach, the bigger the spirit bomb gets! Maximum 250px radius.
-               const radius = Math.min(250, 100 + pulse + (altitudeBonus * 0.8)); 
+            // Draw targeting brackets [ ] around the head
+            const cr = Math.min(w, h) * 0.25; // Corner bracket length
+            ctx.beginPath();
+            // Top Left
+            ctx.moveTo(bx + cr, by); ctx.lineTo(bx, by); ctx.lineTo(bx, by + cr);
+            // Top Right
+            ctx.moveTo(bx + w - cr, by); ctx.lineTo(bx + w, by); ctx.lineTo(bx + w, by + cr);
+            // Bottom Left
+            ctx.moveTo(bx + cr, by + h); ctx.lineTo(bx, by + h); ctx.lineTo(bx, by + h - cr);
+            // Bottom Right
+            ctx.moveTo(bx + w - cr, by + h); ctx.lineTo(bx + w, by + h); ctx.lineTo(bx + w, by + h - cr);
+            ctx.stroke();
+          }
 
-               ctx.shadowBlur = 100 + pulse;
-               ctx.shadowColor = "#add8e6"; // Blueish glow
-               
-               const gradient = ctx.createRadialGradient(cx, cy, radius * 0.1, cx, cy, radius);
-               gradient.addColorStop(0, "rgba(255, 255, 255, 1)"); // Star-white core
-               gradient.addColorStop(0.15, "rgba(100, 200, 255, 0.9)"); // Bright blue
-               gradient.addColorStop(0.5, "rgba(0, 100, 255, 0.6)"); // Deep blue
-               gradient.addColorStop(1, "rgba(0, 50, 255, 0)"); // Fade out
-               
-               ctx.beginPath();
-               ctx.fillStyle = gradient;
-               ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-               ctx.fill();
-               
-               // Outer swirling energy rings
-               ctx.strokeStyle = "rgba(100, 200, 255, 0.4)";
-               ctx.lineWidth = 4;
-               for (let k = 0; k < 3; k++) {
-                  ctx.beginPath();
-                  const offset = (time / (500 + k * 100)) % (Math.PI * 2);
-                  ctx.arc(cx, cy, radius + 20 + k * 15, offset, offset + Math.PI);
-                  ctx.stroke();
-               }
+          // 2. Draw Body Joints (excluding redundant face dots)
+          ctx.fillStyle = "#ff00ff";
+          pose.keypoints.forEach((kp, index) => {
+            if (index < 5) return; // Skip face tracking points to keep mesh clean
+            if ((kp.score || 0) > 0.4) {
+              ctx.beginPath();
+              ctx.arc(kp.x, kp.y, 4, 0, 2 * Math.PI);
+              ctx.fill();
+            }
+          });
 
-               ctx.shadowBlur = 0; 
-             }
-           }
+          // 3. Draw Body Bones (excluding the messy "W" facial connections)
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          skeletonEdges.forEach(([i, j]: number[]) => {
+            if (i < 5 && j < 5) return; // Completely mute facial lines
+
+            const kp1 = pose.keypoints[i];
+            const kp2 = pose.keypoints[j];
+            if ((kp1.score || 0) > 0.35 && (kp2.score || 0) > 0.35) {
+              ctx.moveTo(kp1.x, kp1.y);
+              ctx.lineTo(kp2.x, kp2.y);
+            }
+          });
+          ctx.stroke();
+
+          ctx.shadowBlur = 0;
+
+          // ==========================================================
+          // 4. DBZ SPIRIT BOMB EASTER EGG (Arms Raised to the Sky!)
+          // ==========================================================
+          const leftWrist = pose.keypoints[9];
+          const rightWrist = pose.keypoints[10];
+          const nose = pose.keypoints[0];
+
+          if ((leftWrist.score || 0) > 0.4 && (rightWrist.score || 0) > 0.4 && (nose.score || 0) > 0.4) {
+            // In Canvas, Y goes DOWN. So if wrists are LESS than nose, arms are in the air!
+            if (leftWrist.y < nose.y - 40 && rightWrist.y < nose.y - 40) {
+              isAnySpiritBombActive = true;
+
+              // Center the massive bomb between the two raised hands
+              const cx = (leftWrist.x + rightWrist.x) / 2;
+              const cy = Math.min(leftWrist.y, rightWrist.y) - 60; // Float slightly above the hands
+
+              const time = Date.now();
+              const pulse = Math.sin(time / 150) * 30; // Slow, massive throb
+              const altitudeBonus = Math.max(0, nose.y - Math.max(leftWrist.y, rightWrist.y));
+
+              // The higher they reach, the bigger the spirit bomb gets! Maximum 250px radius.
+              const radius = Math.min(250, 100 + pulse + (altitudeBonus * 0.8));
+
+              ctx.shadowBlur = 100 + pulse;
+              ctx.shadowColor = "#add8e6"; // Blueish glow
+
+              const gradient = ctx.createRadialGradient(cx, cy, radius * 0.1, cx, cy, radius);
+              gradient.addColorStop(0, "rgba(255, 255, 255, 1)"); // Star-white core
+              gradient.addColorStop(0.15, "rgba(100, 200, 255, 0.9)"); // Bright blue
+              gradient.addColorStop(0.5, "rgba(0, 100, 255, 0.6)"); // Deep blue
+              gradient.addColorStop(1, "rgba(0, 50, 255, 0)"); // Fade out
+
+              ctx.beginPath();
+              ctx.fillStyle = gradient;
+              ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+              ctx.fill();
+
+              // Outer swirling energy rings
+              ctx.strokeStyle = "rgba(100, 200, 255, 0.4)";
+              ctx.lineWidth = 4;
+              for (let k = 0; k < 3; k++) {
+                ctx.beginPath();
+                const offset = (time / (500 + k * 100)) % (Math.PI * 2);
+                ctx.arc(cx, cy, radius + 20 + k * 15, offset, offset + Math.PI);
+                ctx.stroke();
+              }
+
+              ctx.shadowBlur = 0;
+            }
+          }
         });
 
 
@@ -312,8 +312,8 @@ export default function HighFidelityVisionDemo() {
         safeHands.forEach((hand: handPoseDetectionTypes.Hand) => {
           // Different colors for left vs right hand recognition
           const isLeft = hand.handedness === 'Left';
-          const color = isLeft ? '#ff00ff' : '#00ffff'; 
-          
+          const color = isLeft ? '#ff00ff' : '#00ffff';
+
           ctx.strokeStyle = color;
           ctx.lineWidth = 3;
           ctx.lineJoin = 'round';
@@ -338,21 +338,21 @@ export default function HighFidelityVisionDemo() {
             });
             // Connect middle, ring, pinky base strictly to wrist for complete mapping
             if (fingerIndices === middle || fingerIndices === ring || fingerIndices === pinky) {
-                ctx.moveTo(hand.keypoints[0].x, hand.keypoints[0].y);
-                ctx.lineTo(hand.keypoints[fingerIndices[0]].x, hand.keypoints[fingerIndices[0]].y);
+              ctx.moveTo(hand.keypoints[0].x, hand.keypoints[0].y);
+              ctx.lineTo(hand.keypoints[fingerIndices[0]].x, hand.keypoints[fingerIndices[0]].y);
             }
             ctx.stroke();
           });
 
           // Draw individual knuckles / landmarks as distinct points
           hand.keypoints.forEach((kp) => {
-             ctx.beginPath();
-             ctx.arc(kp.x, kp.y, 4, 0, 2 * Math.PI);
-             ctx.fillStyle = '#ffffff';
-             ctx.fill();
-             ctx.strokeStyle = color;
-             ctx.lineWidth = 1;
-             ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(kp.x, kp.y, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            ctx.stroke();
           });
         });
 
@@ -366,33 +366,33 @@ export default function HighFidelityVisionDemo() {
             for (let j = i + 1; j < safeHands.length; j++) {
               const h1 = safeHands[i];
               const h2 = safeHands[j];
-              
+
               const p1 = h1.keypoints[9];
               const p2 = h2.keypoints[9];
-              
+
               if (!p1 || !p2) continue;
 
               const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-              
-              if (dist < 220) { 
+
+              if (dist < 220) {
                 kamehamehaThisFrame = true;
                 const now = Date.now();
                 lastKamehamehaActiveRef.current = now;
-                
+
                 // Accumulate charge while hands are close
                 kamehamehaChargeRef.current = Math.min(1, kamehamehaChargeRef.current + 0.008);
                 const charge = kamehamehaChargeRef.current;
 
                 const cx = (p1.x + p2.x) / 2;
                 const cy = (p1.y + p2.y) / 2;
-                
+
                 const time = now;
                 const pulse = Math.sin(time / 50) * (10 + charge * 30); // Pulse intensifies
-                const chargeScale = (220 - dist) * 0.7; 
-                
+                const chargeScale = (220 - dist) * 0.7;
+
                 // Radius evolves with charge: 40px -> 250px
                 const radius = Math.max(30, 40 + pulse + chargeScale + (charge * 180));
-                
+
                 // 1. SCREEN SHAKE (Extreme state)
                 if (charge > 0.7) {
                   ctx.save();
@@ -417,19 +417,19 @@ export default function HighFidelityVisionDemo() {
 
                 // 3. MAIN PLASMA CORE
                 ctx.shadowBlur = 40 + charge * 100 + pulse;
-                ctx.shadowColor = charge > 0.8 ? "#ffffff" : "#00ffff"; 
-                
+                ctx.shadowColor = charge > 0.8 ? "#ffffff" : "#00ffff";
+
                 const gradient = ctx.createRadialGradient(cx, cy, radius * 0.05, cx, cy, radius);
-                gradient.addColorStop(0, "rgba(255, 255, 255, 1)"); 
-                gradient.addColorStop(0.1 + charge * 0.1, `rgba(${255 - charge * 155}, 255, 255, 1)`); 
-                gradient.addColorStop(0.5, `rgba(0, ${150 + charge * 105}, 255, 0.8)`); 
-                gradient.addColorStop(1, "rgba(0, 50, 255, 0)"); 
-                
+                gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+                gradient.addColorStop(0.1 + charge * 0.1, `rgba(${255 - charge * 155}, 255, 255, 1)`);
+                gradient.addColorStop(0.5, `rgba(0, ${150 + charge * 105}, 255, 0.8)`);
+                gradient.addColorStop(1, "rgba(0, 50, 255, 0)");
+
                 ctx.beginPath();
                 ctx.fillStyle = gradient;
                 ctx.arc(cx, cy, radius, 0, Math.PI * 2);
                 ctx.fill();
-                
+
                 // 4. CHAOTIC LIGHTNING (Intensity increases with charge)
                 const lightningCount = Math.floor(4 + charge * 12);
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
@@ -442,7 +442,7 @@ export default function HighFidelityVisionDemo() {
                   ctx.arc(cx, cy, arcRad, angle1, angle2);
                   ctx.stroke();
                 }
-                
+
                 // 5. MAX CHARGE FLASH
                 if (charge > 0.95 && Math.random() > 0.8) {
                   ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
@@ -450,7 +450,7 @@ export default function HighFidelityVisionDemo() {
                 }
 
                 if (charge > 0.7) ctx.restore();
-                
+
                 ctx.shadowBlur = 0;
               }
             }
@@ -493,35 +493,35 @@ export default function HighFidelityVisionDemo() {
         // 2. RENDER FACE (Precise contours: jawline, eyes, lips)
         // ==========================================================
         safeFaces.forEach((face: faceLandmarksDetectionTypes.Face) => {
-           const pairs = faceLandmarksDetection.util.getAdjacentPairs(faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh);
-           
-           // Render the dense mesh with a very thin line to avoid muddying the image
-           ctx.strokeStyle = 'rgba(57, 255, 20, 0.35)'; // Cyber Green, transparent
-           ctx.lineWidth = 0.8;
-           ctx.beginPath();
-           
-           pairs.forEach((pair: number[]) => {
-             const i = pair[0];
-             const j = pair[1];
-             if (face.keypoints[i] && face.keypoints[j]) {
-               ctx.moveTo(face.keypoints[i].x, face.keypoints[i].y);
-               ctx.lineTo(face.keypoints[j].x, face.keypoints[j].y);
-             }
-           });
-           ctx.stroke();
+          const pairs = faceLandmarksDetection.util.getAdjacentPairs(faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh);
 
-           // Add tiny highlight dots on the mesh vertices for that futuristic mapping aesthetic
-           ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-           face.keypoints.forEach((kp) => {
-             ctx.beginPath();
-             // We map standard z coordinates to size for depth illusion (z is negative when closer to camera)
-             const size = Math.max(0.2, 1.2 - ((kp.z || 0) / 20)); 
-             ctx.arc(kp.x, kp.y, size, 0, 2 * Math.PI);
-             ctx.fill();
-           });
+          // Render the dense mesh with a very thin line to avoid muddying the image
+          ctx.strokeStyle = 'rgba(57, 255, 20, 0.35)'; // Cyber Green, transparent
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+
+          pairs.forEach((pair: number[]) => {
+            const i = pair[0];
+            const j = pair[1];
+            if (face.keypoints[i] && face.keypoints[j]) {
+              ctx.moveTo(face.keypoints[i].x, face.keypoints[i].y);
+              ctx.lineTo(face.keypoints[j].x, face.keypoints[j].y);
+            }
+          });
+          ctx.stroke();
+
+          // Add tiny highlight dots on the mesh vertices for that futuristic mapping aesthetic
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+          face.keypoints.forEach((kp) => {
+            ctx.beginPath();
+            // We map standard z coordinates to size for depth illusion (z is negative when closer to camera)
+            const size = Math.max(0.2, 1.2 - ((kp.z || 0) / 20));
+            ctx.arc(kp.x, kp.y, size, 0, 2 * Math.PI);
+            ctx.fill();
+          });
         });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Frame processing error:", err);
         setError("AI Crash: " + (err.message || String(err)));
@@ -544,8 +544,8 @@ export default function HighFidelityVisionDemo() {
       if (faceDetector) faceDetector.dispose();
       if (poseDetector) poseDetector.dispose();
       if (currentVideo && currentVideo.srcObject) {
-         const stream = currentVideo.srcObject as MediaStream;
-         stream.getTracks().forEach((track) => track.stop());
+        const stream = currentVideo.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
@@ -566,21 +566,21 @@ export default function HighFidelityVisionDemo() {
 
       <div className="z-10 text-center mb-8">
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-4 text-white">
-          Cyber<span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-fuchsia-500">Vision</span>
+          AI<span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-fuchsia-500">Vision</span>
         </h1>
         <p className="text-neutral-400 max-w-2xl text-lg font-light">
           High-fidelity tracking running locally. Features dense 468-point facial contour mapping and detailed hand tracking.
         </p>
       </div>
-      
+
       <div className="z-10 relative flex w-full max-w-6xl justify-center">
         {!isLoaded && !error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-2xl z-30 border border-neutral-800 backdrop-blur-sm">
-             <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mb-4"></div>
-             <p className="text-cyan-400 font-mono tracking-widest text-sm uppercase">Loading Precision Models...</p>
+            <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mb-4"></div>
+            <p className="text-cyan-400 font-mono tracking-widest text-sm uppercase">Loading Precision Models...</p>
           </div>
         )}
-        
+
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-red-950/80 rounded-2xl z-30 border border-red-500 backdrop-blur-md">
             <div className="text-red-400 font-bold p-6 text-center max-w-lg">
@@ -596,32 +596,32 @@ export default function HighFidelityVisionDemo() {
           {/* Event branding overlay */}
           <div className="absolute top-6 right-6 z-40 pointer-events-none drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] opacity-90 transition-opacity">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src="/ustp-autotronics-logo.png" 
-              alt="USTP Autotronics Event Logo" 
-              className="h-28 md:h-40 lg:h-48 w-auto object-contain" 
+            <img
+              src="/ustp-autotronics-logo.png"
+              alt="USTP Autotronics Event Logo"
+              className="h-28 md:h-40 lg:h-48 w-auto object-contain"
             />
           </div>
-          <video 
-            ref={videoRef} 
+          <video
+            ref={videoRef}
             width={1280}
             height={720}
             className="w-full h-full object-cover opacity-90"
-            playsInline 
-            muted 
+            playsInline
+            muted
           />
-          <canvas 
-            ref={canvasRef} 
+          <canvas
+            ref={canvasRef}
             className="absolute top-0 left-0 w-full h-full object-cover z-10 pointer-events-none"
           />
-          
-          <button 
+
+          <button
             onClick={toggleFullScreen}
             className="absolute bottom-4 right-4 z-50 p-3 bg-black/60 hover:bg-cyan-900/80 rounded-full text-white border border-white/20 backdrop-blur-md transition-all opacity-30 hover:opacity-100 group-hover:opacity-100"
             title="Toggle Fullscreen"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
             </svg>
           </button>
         </div>
