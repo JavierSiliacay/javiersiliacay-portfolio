@@ -1,9 +1,10 @@
 "use client";
 
 import TypingText from "../TypingText";
-import { Github, ChevronRight, Sparkles } from "lucide-react";
+import { Github, ChevronRight, Sparkles, FileText, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 
 const techStack = [
   { name: "TypeScript" }, { name: "Next.js" }, { name: "Supabase" },
@@ -42,12 +43,21 @@ export default function Hero() {
             From USTP Cagayan de Oro. Building intelligent systems that combine embedded electronics, full-stack web platforms, IoT Projects and AI-driven integrated solutions.
           </p>
 
-          <div className="flex gap-4 flex-wrap mb-12">
+          <div className="flex gap-4 flex-wrap mb-12 items-center">
             <a href="#projects" className="px-8 py-3.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/20 transition-all hover:scale-105 flex items-center gap-2">
               View My Work <ChevronRight size={18} />
             </a>
             <a href="https://github.com/javiersiliacay" target="_blank" rel="noopener noreferrer" className="px-8 py-3.5 border border-slate-700 bg-slate-800/50 hover:border-primary-400 text-slate-300 rounded-xl font-semibold transition-all hover:scale-105 flex items-center gap-2">
               <Github size={18} /> GitHub
+            </a>
+
+            <span className="hidden sm:inline-block w-[1px] h-8 bg-slate-800 mx-2" />
+
+            <Link href="/resume" target="_blank" rel="noopener noreferrer" className="px-6 py-3.5 bg-primary-500/10 hover:bg-primary-500/20 border border-primary-500/30 text-primary-400 hover:text-primary-300 rounded-xl font-semibold transition-all hover:scale-105 flex items-center gap-2">
+              <FileText size={18} /> View Resume
+            </Link>
+            <a href="/Javier_Siliacay_Resume.pdf" download="Javier_Siliacay_Resume.pdf" className="px-6 py-3.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 hover:border-primary-400 text-slate-300 hover:text-white rounded-xl font-semibold transition-all hover:scale-105 flex items-center gap-2">
+              <Download size={18} /> Download CV
             </a>
           </div>
 

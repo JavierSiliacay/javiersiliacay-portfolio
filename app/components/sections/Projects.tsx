@@ -19,6 +19,20 @@ const projects = [
     stars: 0,
   },
   {
+    title: "Multimodal AI Vision Lab",
+    description: "High-fidelity local AI computer vision laboratory. Integrates real-time 468-point face mesh tracking, multi-person skeletal pose mapping, and detailed hand tracking with DBZ interactive audio-visual easter eggs.",
+    tech: ["TensorFlow.js", "MediaPipe", "Computer Vision", "Next.js"],
+    link: "/vision",
+    stars: 0,
+  },
+  {
+    title: "Sadbai AI",
+    description: "Engineered a fully functional AI-driven diagnostic platform in a 24-hour speedrun development, integrating RAG pipelines and LangChain for rapid technical data analysis and insights.",
+    tech: ["GenAI", "RAG Pipelines", "LangChain", "Next.js"],
+    link: "https://github.com/JavierSiliacay/Sadbai-AI",
+    stars: 0,
+  },
+  {
     title: "tarafix",
     description: "Home services marketplace connecting customers with service providers. Features advanced caching with Upstash Redis and TanStack Query for optimal performance. Currently improving.",
     tech: ["TypeScript", "Next.js", "Supabase", "Redis", "TanStack Query"],
@@ -63,11 +77,11 @@ export default function Projects() {
             <div className="relative mt-6 flex items-center justify-between">
               <a
                 href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 font-medium text-sm"
+                target={project.link.startsWith("/") ? "_self" : "_blank"}
+                rel={project.link.startsWith("/") ? "" : "noopener noreferrer"}
+                className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 font-semibold text-sm transition-colors"
               >
-                View Project <ExternalLink size={14} />
+                {project.link.startsWith("/") ? "Launch Experiment ⚡" : "View Project"} <ExternalLink size={14} />
               </a>
             </div>
           </motion.article>

@@ -561,14 +561,14 @@ export default function HighFidelityVisionDemo() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-8 overflow-hidden font-sans">
+    <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden font-sans">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black z-0 pointer-events-none"></div>
 
-      <div className="z-10 text-center mb-8">
-        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-4 text-white">
+      <div className="z-10 text-center mb-6 sm:mb-8">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-3 text-white">
           AI<span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-fuchsia-500">Vision</span>
         </h1>
-        <p className="text-neutral-400 max-w-2xl text-lg font-light">
+        <p className="text-neutral-400 max-w-2xl text-sm sm:text-base md:text-lg font-light px-2">
           High-fidelity tracking running locally. Features dense 468-point facial contour mapping and detailed hand tracking.
         </p>
       </div>
@@ -576,15 +576,15 @@ export default function HighFidelityVisionDemo() {
       <div className="z-10 relative flex w-full max-w-6xl justify-center">
         {!isLoaded && !error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-2xl z-30 border border-neutral-800 backdrop-blur-sm">
-            <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mb-4"></div>
-            <p className="text-cyan-400 font-mono tracking-widest text-sm uppercase">Loading Precision Models...</p>
+            <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mb-4"></div>
+            <p className="text-cyan-400 font-mono tracking-widest text-xs sm:text-sm uppercase">Loading Precision Models...</p>
           </div>
         )}
 
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-red-950/80 rounded-2xl z-30 border border-red-500 backdrop-blur-md">
-            <div className="text-red-400 font-bold p-6 text-center max-w-lg">
-              <svg className="w-12 h-12 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-red-400 font-bold p-4 sm:p-6 text-center max-w-lg text-sm sm:text-base">
+              <svg className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               {error}
@@ -594,12 +594,12 @@ export default function HighFidelityVisionDemo() {
 
         <div ref={containerRef} className="group relative rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(0,255,255,0.15)] ring-1 ring-white/10 aspect-video w-full bg-black">
           {/* Event branding overlay */}
-          <div className="absolute top-6 right-6 z-40 pointer-events-none drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] opacity-90 transition-opacity">
+          <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-40 pointer-events-none drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] opacity-90 transition-opacity">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/ustp-autotronics-logo.png"
               alt="USTP Autotronics Event Logo"
-              className="h-28 md:h-40 lg:h-48 w-auto object-contain"
+              className="h-10 sm:h-20 md:h-32 lg:h-40 w-auto object-contain"
             />
           </div>
           <video

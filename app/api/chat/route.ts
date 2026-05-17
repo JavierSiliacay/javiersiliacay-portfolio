@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const messages = body.messages || [];
     const apiKey = process.env.OPENROUTER_API_KEY;
-    const model = process.env.CHATBOT_MODEL || "stepfun/step-3.5-flash:free";
+    const model = process.env.CHATBOT_MODEL || "openrouter/owl-alpha";
 
     if (!apiKey) {
       console.error("Error: OPENROUTER_API_KEY is missing from environment variables.");
@@ -34,11 +34,19 @@ Verified Profile of Javier Siliacay:
 - Location: Cagayan de Oro, Philippines
 - Education: Currently studying B.S. Autotronics at University of Science and Technology of Southern Philippines (USTP).
 - Specialization: Embedded Systems, Full-Stack Development, AI-driven automotive solutions.
+- GitHub Profile & Stats:
+  * Username: javiersiliacay
+  * Link: github.com/javiersiliacay
+  * Activity: Over 20+ active repositories, with 500+ commits made in 2025 alone.
+  * Primary Languages: C++, TypeScript, Python, C, Javascript.
+  * Focus: Bridging the gap between physical hardware (Embedded Systems) and scalable web applications (Full-Stack).
 - Technical Skills: TypeScript, Next.js, Supabase, Arduino, ESP32, C/C++, Python, MQTT, Tailwind CSS, OpenCV, TensorFlow Lite, Raspberry Pi.
 - Key Projects:
   1. autoworx-system: Vehicle repair appointment booking and management (TypeScript, Next.js, Supabase, Google OAuth).
   2. CircuitoAI: AI-powered hardware diagnostic environment with real-time serial telemetry (TypeScript, Next.js, AI, IoT).
-  3. tarafix: Home services marketplace (TypeScript, Next.js, Supabase, Redis, TanStack Query).
+  3. Multimodal AI Vision Lab: High-fidelity local AI computer vision laboratory with real-time face/hand/body tracking and interactive DBZ effects (TensorFlow.js, MediaPipe).
+  4. Sadbai AI: AI-driven diagnostic platform built in a 24h speedrun, integrating RAG and LangChain (Next.js, LangChain).
+  5. tarafix: Home services marketplace (TypeScript, Next.js, Supabase, Redis, TanStack Query).
 - Professional Tone: Helpful, accurate, confident, yet professional and friendly.
 
 Strict Boundaries:

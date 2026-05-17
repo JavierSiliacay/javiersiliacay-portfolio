@@ -240,11 +240,17 @@ export default function MultimodalVision() {
               <canvas ref={canvasRef} width={320} height={256} className="absolute inset-0 w-full h-full pointer-events-none z-30" />
             </div>
             
-            <div className="absolute bottom-4 left-0 right-0 text-center z-40">
-              <div className="flex items-center justify-center gap-2 mb-1">
+            <div className="absolute bottom-4 left-0 right-0 z-40 px-4 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
                 <ShieldCheck size={10} className="text-green-500" />
                 <p className="text-[7px] font-black text-white/30 uppercase tracking-[0.4em]">Biometric Local Sync</p>
               </div>
+              <a 
+                href="/vision" 
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-xl border border-primary-500/20 hover:border-primary-400 bg-primary-500/10 hover:bg-primary-500/20 text-primary-400 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all hover:scale-[1.02]"
+              >
+                Launch Fullscreen DBZ Mode ⚡
+              </a>
             </div>
           </motion.div>
         )}

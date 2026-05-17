@@ -1,7 +1,8 @@
 "use client";
 
-import { MapPin, Cpu, Code, Server } from "lucide-react";
+import { MapPin, Cpu, Code, Server, FileText, Download } from "lucide-react";
 import AnimatedCppCode from "../AnimatedCppCode";
+import Link from "next/link";
 
 export default function About() {
   return (
@@ -40,6 +41,18 @@ export default function About() {
         </ul>
         <div className="text-sm text-slate-400 pt-2 border-t border-slate-700">
           <AnimatedCppCode speed={50} />
+        </div>
+
+        <div className="pt-4 border-t border-slate-700/60 flex flex-wrap gap-4 items-center justify-between">
+          <span className="text-sm text-slate-400 font-medium">Looking for my full background?</span>
+          <div className="flex gap-3">
+            <Link href="/resume" target="_blank" rel="noopener noreferrer" className="px-4 py-2 text-xs rounded-lg bg-primary-600 hover:bg-primary-500 text-white font-bold transition-all hover:scale-105 flex items-center gap-1.5 shadow-md shadow-primary-500/10">
+              <FileText size={14} /> View Interactive Resume
+            </Link>
+            <a href="/Javier_Siliacay_Resume.pdf" download="Javier_Siliacay_Resume.pdf" className="px-4 py-2 text-xs rounded-lg border border-slate-600 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white font-bold transition-all hover:scale-105 flex items-center gap-1.5">
+              <Download size={14} /> Download PDF
+            </a>
+          </div>
         </div>
       </div>
     </section>
