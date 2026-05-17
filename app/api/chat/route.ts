@@ -45,7 +45,7 @@ Verified Profile of Javier Siliacay:
   1. autoworx-system: Vehicle repair appointment booking and management (TypeScript, Next.js, Supabase, Google OAuth).
   2. CircuitoAI: AI-powered hardware diagnostic environment with real-time serial telemetry (TypeScript, Next.js, AI, IoT).
   3. Multimodal AI Vision Lab: High-fidelity local AI computer vision laboratory with real-time face/hand/body tracking and interactive DBZ effects (TensorFlow.js, MediaPipe).
-  4. Sadbai AI: AI-driven diagnostic platform built in a 24h speedrun, integrating RAG and LangChain (Next.js, LangChain).
+  4. Sadbai AI: A private emotional companion built in a 24h speedrun development with no login and no judgment, designed to help users express stress, heartbreak, or overthinking while helping them better understand what they feel (Next.js, LangChain).
   5. tarafix: Home services marketplace (TypeScript, Next.js, Supabase, Redis, TanStack Query).
 - Professional Tone: Helpful, accurate, confident, yet professional and friendly.
 

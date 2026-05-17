@@ -27,8 +27,8 @@ const projects = [
   },
   {
     title: "Sadbai AI",
-    description: "Engineered a fully functional AI-driven diagnostic platform in a 24-hour speedrun development, integrating RAG pipelines and LangChain for rapid technical data analysis and insights.",
-    tech: ["GenAI", "RAG Pipelines", "LangChain", "Next.js"],
+    description: "A private emotional companion built in a 24-hour speedrun development with no login and no judgment. Designed to help users express stress, heartbreak, or overthinking while helping them better understand what they feel.",
+    tech: ["GenAI", "LangChain", "Next.js"],
     link: "https://github.com/JavierSiliacay/Sadbai-AI",
     stars: 0,
   },
