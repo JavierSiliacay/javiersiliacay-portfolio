@@ -39,6 +39,13 @@ const projects = [
     link: "https://github.com/JavierSiliacay/tarafix",
     stars: 0,
   },
+  {
+      title: "Mekanik AI",
+    description: "Home services marketplace connecting customers with service providers. Features advanced caching with Upstash Redis and TanStack Query for optimal performance. Currently improving.",
+    tech: ["Offline LLM Integration", "Mobile App Development", "Cloud AI API", "OBDII Integrations"],
+    link: "https://github.com/JavierSiliacay/mekanik-ai",
+    stars: 0,
+  },
 ];
 
 export default function Projects() {
