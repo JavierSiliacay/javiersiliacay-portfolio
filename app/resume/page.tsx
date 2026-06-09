@@ -192,11 +192,10 @@ export default function ResumePage() {
                                 </div>
                                 <div>
                                     <h4 className="text-md font-bold text-slate-900 flex items-center gap-2 print:text-sm">
-                                        Circuito AI <span className="text-[10px] font-medium text-slate-400">| Next.js 16, Web Serial API, Monaco Editor</span>
+                                        Mekanik AI <span className="text-[10px] font-medium text-slate-400">| Next.js 16, Web Serial API, Monaco Editor</span>
                                     </h4>
                                     <div className="text-sm text-slate-600 mt-1 print:text-[10px] print:leading-normal">
-                                        <p>Architected a browser-based hardware IDE featuring an <strong>Automotive Diagnostic Station</strong> with real-time serial telemetry and <strong>Autonomous Link</strong> firmware flashing via Web Serial API.</p>
-                                        <p className="mt-1">Integrated a resident <strong>AI Specialist</strong> for automated fault analysis and industrial insights directly from live sensor data buffers.</p>
+                                        <p>Mekanik AI is a cutting-edge Android application designed to provide intelligent, real-time automotive assistance. It leverages a hybrid AI architecture, combining powerful cloud-based models with local offline inference for a seamless diagnostic experience.</p>
                                     </div>
                                 </div>
                             </div>
