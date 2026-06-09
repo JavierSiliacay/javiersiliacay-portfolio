@@ -41,7 +41,7 @@ const projects = [
   },
   {
       title: "Mekanik AI",
-    description: "Home services marketplace connecting customers with service providers. Features advanced caching with Upstash Redis and TanStack Query for optimal performance. Currently improving.",
+    description: "Mekanik AI is a cutting-edge Android application designed to provide intelligent, real-time automotive assistance. It leverages a hybrid AI architecture, combining powerful cloud-based models with local offline inference for a seamless diagnostic experience.",
     tech: ["Offline LLM Integration", "Mobile App Development", "Cloud AI API", "OBDII Integrations"],
     link: "https://github.com/JavierSiliacay/mekanik-ai",
     stars: 0,
