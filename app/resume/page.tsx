@@ -192,7 +192,7 @@ export default function ResumePage() {
                                 </div>
                                 <div>
                                     <h4 className="text-md font-bold text-slate-900 flex items-center gap-2 print:text-sm">
-                                        Mekanik AI <span className="text-[10px] font-medium text-slate-400">| Next.js 16, Web Serial API, Monaco Editor</span>
+                                        Mekanik AI <span className="text-[10px] font-medium text-slate-400">| Android, LLM Integration, On-Device Automotive AI</span>
                                     </h4>
                                     <div className="text-sm text-slate-600 mt-1 print:text-[10px] print:leading-normal">
                                         <p>Mekanik AI is a cutting-edge Android application designed to provide intelligent, real-time automotive assistance. It leverages a hybrid AI architecture, combining powerful cloud-based models with local offline inference for a seamless diagnostic experience.</p>
