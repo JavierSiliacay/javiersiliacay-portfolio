@@ -116,26 +116,26 @@ export default function ResumePage() {
                             {/* Autoworx Ecosystem */}
                             <div className="mb-8 print:mb-4">
                                 <div className="flex justify-between items-start mb-1 print:mb-0.5">
-                                    <h4 className="text-lg font-bold text-slate-900 print:text-sm">Full-Stack Lead Developer</h4>
+                                    <h4 className="text-lg font-bold text-slate-900 print:text-sm">Full-Stack Lead Developer &amp; Systems Architect</h4>
                                     <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded print:text-[9px]">2025 — CURRENT</span>
                                 </div>
-                                <div className="text-[#800000] font-black mb-3 uppercase tracking-widest text-[11px] print:text-[10px] print:mb-2">Autoworx & Partner Companies</div>
+                                <div className="text-[#800000] font-black mb-3 uppercase tracking-widest text-[11px] print:text-[10px] print:mb-2">Autoworx &amp; Partner Companies</div>
                                 <ul className="space-y-1.5 print:space-y-1">
                                     <li className="text-sm text-slate-600 flex gap-2 print:text-[10px] print:leading-normal">
-                                        <span className="text-[#800000] font-bold">•</span>
-                                        <span>Architected and deployed a full-scale vehicle service management system using <strong>Next.js 16</strong> and <strong>Supabase</strong> for core operations.</span>
+                                         <span className="text-[#800000] font-bold">•</span>
+                                         <span>Architect and scale multi-tenant web platforms using <strong>Next.js</strong>, <strong>TypeScript</strong>, <strong>PostgreSQL</strong>, and <strong>REST APIs</strong> powering automotive ERP and freight dispatch operations.</span>
                                     </li>
                                     <li className="text-sm text-slate-600 flex gap-2 print:text-[10px] print:leading-normal">
-                                        <span className="text-[#800000] font-bold">•</span>
-                                        <span>Integrated a custom <strong>AI Diagnostics Engine</strong> and automated financial tracking, reducing report generation time by <strong>40%</strong>.</span>
+                                         <span className="text-[#800000] font-bold">•</span>
+                                         <span>Integrated custom <strong>AI Diagnostics Engine</strong> and automated financial pipelines, accelerating reporting and troubleshooting turnaround by <strong>40%</strong>.</span>
                                     </li>
                                     <li className="text-sm text-slate-600 flex gap-2 print:text-[10px] print:leading-normal">
-                                        <span className="text-[#800000] font-bold">•</span>
-                                        <span>Designed and maintained <strong>15+ modular UI components</strong> ensuring a mobile-responsive experience for staff and customers.</span>
+                                         <span className="text-[#800000] font-bold">•</span>
+                                         <span>Engineered and maintained <strong>20+ responsive web interfaces</strong> and role-based portals for dispatchers, mechanics, drivers, and enterprise administrators.</span>
                                     </li>
                                     <li className="text-sm text-slate-600 flex gap-2 print:text-[10px] print:leading-normal">
-                                        <span className="text-[#800000] font-bold">•</span>
-                                        <span>Analyzed and implemented secure server-side authorization patterns to safeguard sensitive business data.</span>
+                                         <span className="text-[#800000] font-bold">•</span>
+                                         <span>Oversee database reliability, secure access policies (RLS), and real-time state sync across live commercial business workflows.</span>
                                     </li>
                                 </ul>
                             </div>
@@ -215,7 +215,6 @@ export default function ResumePage() {
                                     University of Science and Technology of Southern Philippines
                                 </p>
                                 <p className="text-[10px] text-slate-500 font-bold print:text-[8px]">2022 — 2026</p>
-                                <p className="text-[10px] text-slate-500 font-bold print:text-[8px]">Dean’s Lister – 1st Semester, A.Y. 2024–2025</p>
                             </div>
                             <div className="p-4 bg-white border border-slate-100 rounded-xl shadow-sm print:p-3 print:border-2 mb-4 print:mb-2">
                                 <p className="text-xs font-bold text-slate-900 leading-tight mb-1 print:text-[10px]">Lead Developer of the Thesis Project</p>

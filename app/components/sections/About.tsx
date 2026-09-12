@@ -14,6 +14,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface ExperienceItem {
   period: string;
@@ -26,14 +27,15 @@ interface ExperienceItem {
 const experienceData: ExperienceItem[] = [
   {
     period: "2025 — PRESENT",
-    role: "Full-Stack Lead Developer",
+    role: "Full-Stack Lead Developer & Systems Architect",
     organization: "Autoworx & Partner Companies",
     description:
-      "Architecting and deploying production operations software, enterprise ERP platforms, logistics systems, and AI diagnostic tools across Autoworx and partner client fleets.",
+      "Architecting, deploying, and managing the core software ecosystem across multiple commercial companies—including enterprise automotive ERP platforms, logistics dispatch suites, and AI diagnostic tools.",
     highlights: [
-      "Deployed Next.js 16 + Supabase production architecture with secure RLS",
-      "Integrated AI Diagnostics Engine reducing reporting overhead by 40%",
-      "Maintained 15+ responsive UI modules for mechanics, dispatchers, admins, and clients",
+      "Architect and scale multi-tenant web platforms (Next.js, TypeScript, PostgreSQL, REST APIs) powering automotive shop operations and freight logistics",
+      "Integrated custom AI Diagnostics Engine & automated financial pipelines, accelerating reporting and troubleshooting turnaround by 40%",
+      "Engineered 20+ responsive web interfaces & role-based portals for dispatchers, mechanics, drivers, and enterprise admins",
+      "Oversee database reliability, secure access policies (RLS), and real-time state sync across live commercial business workflows",
     ],
   },
   {
@@ -111,7 +113,7 @@ export default function About() {
               <strong className="text-slate-900 dark:text-white font-semibold">
                 B.S. in Autotronics at USTP
               </strong>{" "}
-              (Dean&apos;s Lister) while architecting production full-stack software and AI systems.
+              while architecting production full-stack software and AI systems.
             </p>
             <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
               My engineering philosophy centers on{" "}
@@ -121,14 +123,34 @@ export default function About() {
               . Rather than building isolated toy apps, I build systems that interface with physical reality—from embedded telemetry sensors and serial communication to production ERP web platforms and on-device computer vision models.
             </p>
 
-            <div className="pt-3 flex flex-wrap gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-white/[0.06]">
+            <div className="pt-4 flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-white/[0.06]">
               <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                 <MapPin size={14} className="text-cyan-600 dark:text-cyan-400" />
                 <span>Cagayan de Oro, Philippines</span>
               </div>
-              <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                <Award size={14} className="text-amber-500" />
-                <span>USTP Dean&apos;s Lister (2024–2025)</span>
+
+              {/* USTP & Autotronics Program Logos */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/[0.08] shadow-xs">
+                  <Image
+                    src="/ustp.png"
+                    alt="USTP Logo"
+                    width={18}
+                    height={18}
+                    className="object-contain"
+                  />
+                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 tracking-tight">USTP</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/[0.08] shadow-xs">
+                  <Image
+                    src="/at_logo.png"
+                    alt="Autotronics Logo"
+                    width={18}
+                    height={18}
+                    className="object-contain"
+                  />
+                  <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 tracking-tight">Autotronics</span>
+                </div>
               </div>
             </div>
           </div>
