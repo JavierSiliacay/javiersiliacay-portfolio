@@ -1,7 +1,25 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import {
+  ArrowLeft,
+  Maximize2,
+  Minimize2,
+  Eye,
+  Hand,
+  Activity,
+  Zap,
+  Volume2,
+  VolumeX,
+  ShieldCheck,
+  Cpu,
+  Layers,
+  Radio,
+  Flame
+} from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
+import ThemeToggle from "../components/ThemeToggle";
 import type * as handPoseDetectionTypes from "@tensorflow-models/hand-pose-detection";
 import type * as faceLandmarksDetectionTypes from "@tensorflow-models/face-landmarks-detection";
 import type * as poseDetectionTypes from "@tensorflow-models/pose-detection";
@@ -30,12 +48,52 @@ if (typeof window !== "undefined") {
   poseDetection = require("@tensorflow-models/pose-detection/dist/index.js");
 }
 
+interface TelemetryData {
+  fps: number;
+  faces: number;
+  hands: number;
+  poses: number;
+  activeVfx: "Idle" | "Kamehameha Charging" | "Spirit Bomb Active" | "None";
+}
+
 export default function HighFidelityVisionDemo() {
+  const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // User interactive feature controls
+  const [showFaceMesh, setShowFaceMesh] = useState(true);
+  const [showHands, setShowHands] = useState(true);
+  const [showPoses, setShowPoses] = useState(true);
+  const [showVFX, setShowVFX] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  // Live telemetry state for the floating HUD
+  const [telemetry, setTelemetry] = useState<TelemetryData>({
+    fps: 0,
+    faces: 0,
+    hands: 0,
+    poses: 0,
+    activeVfx: "Idle",
+  });
+
+  // Dynamic refs so the animation loop always reads latest toggle values without re-mounting
+  const showFaceMeshRef = useRef(true);
+  const showHandsRef = useRef(true);
+  const showPosesRef = useRef(true);
+  const showVFXRef = useRef(true);
+  const soundEnabledRef = useRef(true);
+
+  showFaceMeshRef.current = showFaceMesh;
+  showHandsRef.current = showHands;
+  showPosesRef.current = showPoses;
+  showVFXRef.current = showVFX;
+  soundEnabledRef.current = soundEnabled;
+
   const spiritBombAudioRef = useRef<HTMLAudioElement | null>(null);
   const kamehamehaAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -43,7 +101,7 @@ export default function HighFidelityVisionDemo() {
   const kamehamehaChargeRef = useRef<number>(0);
   const lastKamehamehaActiveRef = useRef<number>(0);
 
-  // Initialize Audios
+  // Initialize Audio
   useEffect(() => {
     const sbaudio = new Audio("/spiritbomb.mp3");
     sbaudio.loop = true;
@@ -59,11 +117,35 @@ export default function HighFidelityVisionDemo() {
     };
   }, []);
 
+  // Listen to fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const toggleFullScreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }, []);
+
   useEffect(() => {
     let handDetector: handPoseDetectionTypes.HandDetector | null = null;
     let faceDetector: faceLandmarksDetectionTypes.FaceLandmarksDetector | null = null;
     let poseDetector: poseDetectionTypes.PoseDetector | null = null;
     let animationFrameId: number;
+
+    // FPS calculation tracking
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let currentFps = 0;
 
     const setupCamera = async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -95,33 +177,33 @@ export default function HighFidelityVisionDemo() {
       try {
         await tf.ready();
 
-        // 1. Initialize High-Fidelity Hand Tracking (Crowd Scale)
+        // 1. Hand Tracking (Multi-Hand)
         handDetector = await handPoseDetection.createDetector(
           handPoseDetection.SupportedModels.MediaPipeHands,
           {
-            runtime: 'tfjs',
-            modelType: 'lite', // Lite is significantly faster and often better for close-up distinct palm geometries
+            runtime: "tfjs",
+            modelType: "lite",
             maxHands: 6,
           }
         );
 
-        // 2. Initialize Precise Face Landmarks Mapping (Crowd Scale)
+        // 2. Face Landmarks (468-point 3D contour)
         faceDetector = await faceLandmarksDetection.createDetector(
           faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
           {
-            runtime: 'tfjs',
+            runtime: "tfjs",
             refineLandmarks: true,
             maxFaces: 6,
           }
         );
 
-        // 3. Initialize Multi-Person Skeleton Tracking (Overall Body/Crowd)
+        // 3. Multi-Person MoveNet Skeleton
         poseDetector = await poseDetection.createDetector(
           poseDetection.SupportedModels.MoveNet,
           {
             modelType: poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING,
             enableTracking: true,
-            trackerType: poseDetection.TrackerType.BoundingBox
+            trackerType: poseDetection.TrackerType.BoundingBox,
           }
         );
 
@@ -131,7 +213,7 @@ export default function HighFidelityVisionDemo() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         console.error(e);
-        setError("Failed to load precision models. Ensure camera permissions.");
+        setError("Failed to load precision models. Please ensure webcam permissions are enabled.");
       }
     };
 
@@ -155,12 +237,21 @@ export default function HighFidelityVisionDemo() {
         return;
       }
 
+      // FPS tracking calculation
+      const now = performance.now();
+      frameCount++;
+      if (now - lastTime >= 500) {
+        currentFps = Math.round((frameCount * 1000) / (now - lastTime));
+        frameCount = 0;
+        lastTime = now;
+      }
+
       try {
-        // Run all models simultaneously for temporal smoothing and synced rendering
+        // Run inference in parallel on WebGL
         const [hands, faces, poses] = await Promise.all([
           handDetector.estimateHands(video, { flipHorizontal: false }),
           faceDetector.estimateFaces(video, { flipHorizontal: false }),
-          poseDetector!.estimatePoses(video, { flipHorizontal: false })
+          poseDetector!.estimatePoses(video, { flipHorizontal: false }),
         ]);
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -169,200 +260,195 @@ export default function HighFidelityVisionDemo() {
         const safeFaces = faces || [];
         const safePoses = poses || [];
 
-        // -- DEBUG OVERLAY --
-        ctx.fillStyle = "rgba(0, 0, 0, 0.9)"; // Darker background
-        ctx.fillRect(10, 10, 240, 80);
-        ctx.fillStyle = "#ffffff"; // Pure white for visibility
-        ctx.font = "bold 16px monospace";
-        ctx.fillText(`Hand Detections: ${safeHands.length}`, 25, 36);
-        ctx.fillStyle = safeFaces.length > 0 ? "#39ff14" : "#ff0000"; // Green / Red
-        const faceText = safeFaces.length > 0 ? `Active (${safeFaces.length * 468} pts)` : 'Searching...';
-        ctx.fillText(`Face Mesh: ${faceText}`, 25, 56);
-        ctx.fillStyle = "#ff00ff"; // Pink for bodies
-        ctx.fillText(`Body Poses: ${safePoses.length}`, 25, 76);
+        let currentActiveVfx: TelemetryData["activeVfx"] = "Idle";
 
         // ==========================================================
-        // 0. RENDER BACKGROUND POSES (Generic body detection)
+        // 1. RENDER BACKGROUND BODY POSES & SPIRIT BOMB
         // ==========================================================
         const skeletonEdges = poseDetection.util.getAdjacentPairs(poseDetection.SupportedModels.MoveNet);
-
         let isAnySpiritBombActive = false;
 
         safePoses.forEach((pose: poseDetectionTypes.Pose) => {
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = "#ff00ff";
-          ctx.strokeStyle = "rgba(255, 0, 255, 0.8)";
-          ctx.lineWidth = 3;
+          // If body poses toggle is active, draw skeleton
+          if (showPosesRef.current) {
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#06b6d4";
+            ctx.strokeStyle = "rgba(6, 182, 212, 0.85)";
+            ctx.lineWidth = 3;
 
-          // 1. Draw Sci-Fi Head Targeting Box instead of the ugly facial "W" line
-          const faceKps = pose.keypoints.slice(0, 5);
-          const validFaceKps = faceKps.filter(kp => (kp.score || 0) > 0.3);
+            // Sci-Fi Head Targeting Box
+            const faceKps = pose.keypoints.slice(0, 5);
+            const validFaceKps = faceKps.filter((kp) => (kp.score || 0) > 0.3);
 
-          if (validFaceKps.length >= 2) {
-            const minX = Math.min(...validFaceKps.map(k => k.x));
-            const maxX = Math.max(...validFaceKps.map(k => k.x));
-            const minY = Math.min(...validFaceKps.map(k => k.y));
-            const maxY = Math.max(...validFaceKps.map(k => k.y));
+            if (validFaceKps.length >= 2) {
+              const minX = Math.min(...validFaceKps.map((k) => k.x));
+              const maxX = Math.max(...validFaceKps.map((k) => k.x));
+              const minY = Math.min(...validFaceKps.map((k) => k.y));
+              const maxY = Math.max(...validFaceKps.map((k) => k.y));
 
-            // Dynamically expand box slightly around the detected facial features
-            const w = Math.max(40, (maxX - minX) * 1.8);
-            const h = Math.max(40, (maxY - minY) * 2.2);
-            const cx = minX + (maxX - minX) / 2;
-            const cy = minY + (maxY - minY) / 2;
-            const bx = cx - w / 2;
-            const by = cy - h / 2 - (h * 0.1); // Shift up slightly for forehead
+              const w = Math.max(40, (maxX - minX) * 1.8);
+              const h = Math.max(40, (maxY - minY) * 2.2);
+              const cx = minX + (maxX - minX) / 2;
+              const cy = minY + (maxY - minY) / 2;
+              const bx = cx - w / 2;
+              const by = cy - h / 2 - h * 0.1;
 
-            // Draw targeting brackets [ ] around the head
-            const cr = Math.min(w, h) * 0.25; // Corner bracket length
+              const cr = Math.min(w, h) * 0.25;
+              ctx.beginPath();
+              // Top Left
+              ctx.moveTo(bx + cr, by); ctx.lineTo(bx, by); ctx.lineTo(bx, by + cr);
+              // Top Right
+              ctx.moveTo(bx + w - cr, by); ctx.lineTo(bx + w, by); ctx.lineTo(bx + w, by + cr);
+              // Bottom Left
+              ctx.moveTo(bx + cr, by + h); ctx.lineTo(bx, by + h); ctx.lineTo(bx + h, by + cr);
+              // Bottom Right
+              ctx.moveTo(bx + w - cr, by + h); ctx.lineTo(bx + w, by + h); ctx.lineTo(bx + w, by + h - cr);
+              ctx.stroke();
+            }
+
+            // Draw Body Joints
+            ctx.fillStyle = "#38bdf8";
+            pose.keypoints.forEach((kp, index) => {
+              if (index < 5) return;
+              if ((kp.score || 0) > 0.4) {
+                ctx.beginPath();
+                ctx.arc(kp.x, kp.y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+              }
+            });
+
+            // Draw Body Bones
+            ctx.lineWidth = 4;
             ctx.beginPath();
-            // Top Left
-            ctx.moveTo(bx + cr, by); ctx.lineTo(bx, by); ctx.lineTo(bx, by + cr);
-            // Top Right
-            ctx.moveTo(bx + w - cr, by); ctx.lineTo(bx + w, by); ctx.lineTo(bx + w, by + cr);
-            // Bottom Left
-            ctx.moveTo(bx + cr, by + h); ctx.lineTo(bx, by + h); ctx.lineTo(bx, by + h - cr);
-            // Bottom Right
-            ctx.moveTo(bx + w - cr, by + h); ctx.lineTo(bx + w, by + h); ctx.lineTo(bx + w, by + h - cr);
+            skeletonEdges.forEach(([i, j]: number[]) => {
+              if (i < 5 && j < 5) return;
+              const kp1 = pose.keypoints[i];
+              const kp2 = pose.keypoints[j];
+              if ((kp1.score || 0) > 0.35 && (kp2.score || 0) > 0.35) {
+                ctx.moveTo(kp1.x, kp1.y);
+                ctx.lineTo(kp2.x, kp2.y);
+              }
+            });
             ctx.stroke();
+            ctx.shadowBlur = 0;
           }
 
-          // 2. Draw Body Joints (excluding redundant face dots)
-          ctx.fillStyle = "#ff00ff";
-          pose.keypoints.forEach((kp, index) => {
-            if (index < 5) return; // Skip face tracking points to keep mesh clean
-            if ((kp.score || 0) > 0.4) {
+          // SPIRIT BOMB VFX (Both arms raised high above head)
+          if (showVFXRef.current) {
+            const leftWrist = pose.keypoints[9];
+            const rightWrist = pose.keypoints[10];
+            const nose = pose.keypoints[0];
+
+            if ((leftWrist.score || 0) > 0.4 && (rightWrist.score || 0) > 0.4 && (nose.score || 0) > 0.4) {
+              if (leftWrist.y < nose.y - 40 && rightWrist.y < nose.y - 40) {
+                isAnySpiritBombActive = true;
+                currentActiveVfx = "Spirit Bomb Active";
+
+                const cx = (leftWrist.x + rightWrist.x) / 2;
+                const cy = Math.min(leftWrist.y, rightWrist.y) - 60;
+
+                const time = Date.now();
+                const pulse = Math.sin(time / 150) * 30;
+                const altitudeBonus = Math.max(0, nose.y - Math.max(leftWrist.y, rightWrist.y));
+                const radius = Math.min(250, 100 + pulse + altitudeBonus * 0.8);
+
+                ctx.shadowBlur = 100 + pulse;
+                ctx.shadowColor = "#38bdf8";
+
+                const gradient = ctx.createRadialGradient(cx, cy, radius * 0.1, cx, cy, radius);
+                gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+                gradient.addColorStop(0.15, "rgba(100, 200, 255, 0.95)");
+                gradient.addColorStop(0.5, "rgba(14, 165, 233, 0.6)");
+                gradient.addColorStop(1, "rgba(2, 132, 199, 0)");
+
+                ctx.beginPath();
+                ctx.fillStyle = gradient;
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Swirling energy orbit rings
+                ctx.strokeStyle = "rgba(186, 230, 253, 0.5)";
+                ctx.lineWidth = 4;
+                for (let k = 0; k < 3; k++) {
+                  ctx.beginPath();
+                  const offset = (time / (500 + k * 100)) % (Math.PI * 2);
+                  ctx.arc(cx, cy, radius + 20 + k * 15, offset, offset + Math.PI);
+                  ctx.stroke();
+                }
+
+                ctx.shadowBlur = 0;
+              }
+            }
+          }
+        });
+
+        // Audio controller for Spirit Bomb
+        if (spiritBombAudioRef.current) {
+          if (isAnySpiritBombActive && soundEnabledRef.current) {
+            if (spiritBombAudioRef.current.paused) {
+              spiritBombAudioRef.current.play().catch(() => {});
+            }
+          } else {
+            if (!spiritBombAudioRef.current.paused) {
+              spiritBombAudioRef.current.pause();
+              spiritBombAudioRef.current.currentTime = 0;
+            }
+          }
+        }
+
+        // ==========================================================
+        // 2. RENDER HANDS & KAMEHAMEHA
+        // ==========================================================
+        if (showHandsRef.current) {
+          safeHands.forEach((hand: handPoseDetectionTypes.Hand) => {
+            const isLeft = hand.handedness === "Left";
+            const color = isLeft ? "#ec4899" : "#06b6d4";
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+
+            const thumb = [0, 1, 2, 3, 4];
+            const index = [0, 5, 6, 7, 8];
+            const middle = [9, 10, 11, 12];
+            const ring = [13, 14, 15, 16];
+            const pinky = [17, 18, 19, 20];
+            const palmBase = [0, 5, 9, 13, 17, 0];
+
+            const fingers = [thumb, index, middle, ring, pinky, palmBase];
+
+            fingers.forEach((fingerIndices) => {
+              ctx.beginPath();
+              fingerIndices.forEach((idx, i) => {
+                const kp = hand.keypoints[idx];
+                if (i === 0) ctx.moveTo(kp.x, kp.y);
+                else ctx.lineTo(kp.x, kp.y);
+              });
+              if (fingerIndices === middle || fingerIndices === ring || fingerIndices === pinky) {
+                ctx.moveTo(hand.keypoints[0].x, hand.keypoints[0].y);
+                ctx.lineTo(hand.keypoints[fingerIndices[0]].x, hand.keypoints[fingerIndices[0]].y);
+              }
+              ctx.stroke();
+            });
+
+            // Draw individual joints
+            hand.keypoints.forEach((kp) => {
               ctx.beginPath();
               ctx.arc(kp.x, kp.y, 4, 0, 2 * Math.PI);
+              ctx.fillStyle = "#ffffff";
               ctx.fill();
-            }
-          });
-
-          // 3. Draw Body Bones (excluding the messy "W" facial connections)
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          skeletonEdges.forEach(([i, j]: number[]) => {
-            if (i < 5 && j < 5) return; // Completely mute facial lines
-
-            const kp1 = pose.keypoints[i];
-            const kp2 = pose.keypoints[j];
-            if ((kp1.score || 0) > 0.35 && (kp2.score || 0) > 0.35) {
-              ctx.moveTo(kp1.x, kp1.y);
-              ctx.lineTo(kp2.x, kp2.y);
-            }
-          });
-          ctx.stroke();
-
-          ctx.shadowBlur = 0;
-
-          // ==========================================================
-          // 4. DBZ SPIRIT BOMB EASTER EGG (Arms Raised to the Sky!)
-          // ==========================================================
-          const leftWrist = pose.keypoints[9];
-          const rightWrist = pose.keypoints[10];
-          const nose = pose.keypoints[0];
-
-          if ((leftWrist.score || 0) > 0.4 && (rightWrist.score || 0) > 0.4 && (nose.score || 0) > 0.4) {
-            // In Canvas, Y goes DOWN. So if wrists are LESS than nose, arms are in the air!
-            if (leftWrist.y < nose.y - 40 && rightWrist.y < nose.y - 40) {
-              isAnySpiritBombActive = true;
-
-              // Center the massive bomb between the two raised hands
-              const cx = (leftWrist.x + rightWrist.x) / 2;
-              const cy = Math.min(leftWrist.y, rightWrist.y) - 60; // Float slightly above the hands
-
-              const time = Date.now();
-              const pulse = Math.sin(time / 150) * 30; // Slow, massive throb
-              const altitudeBonus = Math.max(0, nose.y - Math.max(leftWrist.y, rightWrist.y));
-
-              // The higher they reach, the bigger the spirit bomb gets! Maximum 250px radius.
-              const radius = Math.min(250, 100 + pulse + (altitudeBonus * 0.8));
-
-              ctx.shadowBlur = 100 + pulse;
-              ctx.shadowColor = "#add8e6"; // Blueish glow
-
-              const gradient = ctx.createRadialGradient(cx, cy, radius * 0.1, cx, cy, radius);
-              gradient.addColorStop(0, "rgba(255, 255, 255, 1)"); // Star-white core
-              gradient.addColorStop(0.15, "rgba(100, 200, 255, 0.9)"); // Bright blue
-              gradient.addColorStop(0.5, "rgba(0, 100, 255, 0.6)"); // Deep blue
-              gradient.addColorStop(1, "rgba(0, 50, 255, 0)"); // Fade out
-
-              ctx.beginPath();
-              ctx.fillStyle = gradient;
-              ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-              ctx.fill();
-
-              // Outer swirling energy rings
-              ctx.strokeStyle = "rgba(100, 200, 255, 0.4)";
-              ctx.lineWidth = 4;
-              for (let k = 0; k < 3; k++) {
-                ctx.beginPath();
-                const offset = (time / (500 + k * 100)) % (Math.PI * 2);
-                ctx.arc(cx, cy, radius + 20 + k * 15, offset, offset + Math.PI);
-                ctx.stroke();
-              }
-
-              ctx.shadowBlur = 0;
-            }
-          }
-        });
-
-
-        // ==========================================================
-        // 1. RENDER HANDS (Palm contours, full finger tracing)
-        // ==========================================================
-        safeHands.forEach((hand: handPoseDetectionTypes.Hand) => {
-          // Different colors for left vs right hand recognition
-          const isLeft = hand.handedness === 'Left';
-          const color = isLeft ? '#ff00ff' : '#00ffff';
-
-          ctx.strokeStyle = color;
-          ctx.lineWidth = 3;
-          ctx.lineJoin = 'round';
-          ctx.lineCap = 'round';
-
-          // Specific tracing arrays to draw the palm and fingers properly
-          const thumb = [0, 1, 2, 3, 4];
-          const index = [0, 5, 6, 7, 8];
-          const middle = [9, 10, 11, 12];
-          const ring = [13, 14, 15, 16];
-          const pinky = [17, 18, 19, 20];
-          const palmBase = [0, 5, 9, 13, 17, 0]; // Traces the base contour of the palm
-
-          const fingers = [thumb, index, middle, ring, pinky, palmBase];
-
-          fingers.forEach((fingerIndices) => {
-            ctx.beginPath();
-            fingerIndices.forEach((idx, i) => {
-              const kp = hand.keypoints[idx];
-              if (i === 0) ctx.moveTo(kp.x, kp.y);
-              else ctx.lineTo(kp.x, kp.y);
+              ctx.strokeStyle = color;
+              ctx.lineWidth = 1;
+              ctx.stroke();
             });
-            // Connect middle, ring, pinky base strictly to wrist for complete mapping
-            if (fingerIndices === middle || fingerIndices === ring || fingerIndices === pinky) {
-              ctx.moveTo(hand.keypoints[0].x, hand.keypoints[0].y);
-              ctx.lineTo(hand.keypoints[fingerIndices[0]].x, hand.keypoints[fingerIndices[0]].y);
-            }
-            ctx.stroke();
           });
+        }
 
-          // Draw individual knuckles / landmarks as distinct points
-          hand.keypoints.forEach((kp) => {
-            ctx.beginPath();
-            ctx.arc(kp.x, kp.y, 4, 0, 2 * Math.PI);
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          });
-        });
-
-        // ==========================================================
-        // 1.5 DBZ KAMEHAMEHA EASTER EGG (Two-Hand Interaction)
-        // ==========================================================
+        // KAMEHAMEHA VFX (Two hands brought close together)
         let kamehamehaThisFrame = false;
 
-        if (safeHands.length >= 2) {
+        if (showVFXRef.current && safeHands.length >= 2) {
           for (let i = 0; i < safeHands.length; i++) {
             for (let j = i + 1; j < safeHands.length; j++) {
               const h1 = safeHands[i];
@@ -377,31 +463,28 @@ export default function HighFidelityVisionDemo() {
 
               if (dist < 220) {
                 kamehamehaThisFrame = true;
-                const now = Date.now();
-                lastKamehamehaActiveRef.current = now;
+                currentActiveVfx = "Kamehameha Charging";
+                const nowMs = Date.now();
+                lastKamehamehaActiveRef.current = nowMs;
 
-                // Accumulate charge while hands are close
                 kamehamehaChargeRef.current = Math.min(1, kamehamehaChargeRef.current + 0.008);
                 const charge = kamehamehaChargeRef.current;
 
                 const cx = (p1.x + p2.x) / 2;
                 const cy = (p1.y + p2.y) / 2;
 
-                const time = now;
-                const pulse = Math.sin(time / 50) * (10 + charge * 30); // Pulse intensifies
+                const time = nowMs;
+                const pulse = Math.sin(time / 50) * (10 + charge * 30);
                 const chargeScale = (220 - dist) * 0.7;
+                const radius = Math.max(30, 40 + pulse + chargeScale + charge * 180);
 
-                // Radius evolves with charge: 40px -> 250px
-                const radius = Math.max(30, 40 + pulse + chargeScale + (charge * 180));
-
-                // 1. SCREEN SHAKE (Extreme state)
                 if (charge > 0.7) {
                   ctx.save();
                   const shake = (charge - 0.7) * 20;
                   ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
                 }
 
-                // 2. ENERGY GATHERING RINGS (Sucking energy into the core)
+                // Energy gathering rings
                 if (charge > 0.05) {
                   ctx.strokeStyle = `rgba(100, 255, 255, ${0.2 + charge * 0.5})`;
                   ctx.lineWidth = 2 + charge * 4;
@@ -416,7 +499,7 @@ export default function HighFidelityVisionDemo() {
                   }
                 }
 
-                // 3. MAIN PLASMA CORE
+                // Main plasma sphere
                 ctx.shadowBlur = 40 + charge * 100 + pulse;
                 ctx.shadowColor = charge > 0.8 ? "#ffffff" : "#00ffff";
 
@@ -431,56 +514,37 @@ export default function HighFidelityVisionDemo() {
                 ctx.arc(cx, cy, radius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 4. CHAOTIC LIGHTNING (Intensity increases with charge)
+                // Chaotic plasma lightning
                 const lightningCount = Math.floor(4 + charge * 12);
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
                 for (let k = 0; k < lightningCount; k++) {
                   ctx.lineWidth = Math.random() * (1 + charge * 4);
                   ctx.beginPath();
                   const angle1 = Math.random() * Math.PI * 2;
-                  const angle2 = angle1 + (Math.random() * (0.5 + charge));
-                  const arcRad = radius + (Math.random() * (20 + charge * 60));
+                  const angle2 = angle1 + Math.random() * (0.5 + charge);
+                  const arcRad = radius + Math.random() * (20 + charge * 60);
                   ctx.arc(cx, cy, arcRad, angle1, angle2);
                   ctx.stroke();
                 }
 
-                // 5. MAX CHARGE FLASH
-                if (charge > 0.95 && Math.random() > 0.8) {
-                  ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-                  ctx.fillRect(0, 0, canvas.width, canvas.height);
+                if (charge > 0.7) {
+                  ctx.restore();
                 }
-
-                if (charge > 0.7) ctx.restore();
-
-                ctx.shadowBlur = 0;
               }
             }
           }
         }
 
-        // Decay charge if no hands are together
-        if (!kamehamehaThisFrame && Date.now() - lastKamehamehaActiveRef.current > 150) {
+        // Discharge Kamehameha energy when hands separate
+        if (!kamehamehaThisFrame) {
           kamehamehaChargeRef.current = Math.max(0, kamehamehaChargeRef.current - 0.03);
         }
 
-        // Audio control logic
-        if (spiritBombAudioRef.current) {
-          if (isAnySpiritBombActive) {
-            if (spiritBombAudioRef.current.paused) {
-              spiritBombAudioRef.current.play().catch(e => console.warn("Spirit Bomb Audio play failed:", e));
-            }
-          } else {
-            if (!spiritBombAudioRef.current.paused) {
-              spiritBombAudioRef.current.pause();
-              spiritBombAudioRef.current.currentTime = 0;
-            }
-          }
-        }
-
+        // Audio controller for Kamehameha
         if (kamehamehaAudioRef.current) {
-          if (kamehamehaThisFrame) {
+          if (kamehamehaThisFrame && soundEnabledRef.current) {
             if (kamehamehaAudioRef.current.paused) {
-              kamehamehaAudioRef.current.play().catch(e => console.warn("Kamehameha Audio play failed:", e));
+              kamehamehaAudioRef.current.play().catch(() => {});
             }
           } else {
             if (!kamehamehaAudioRef.current.paused) {
@@ -491,42 +555,53 @@ export default function HighFidelityVisionDemo() {
         }
 
         // ==========================================================
-        // 2. RENDER FACE (Precise contours: jawline, eyes, lips)
+        // 3. RENDER 468-POINT 3D FACE MESH CONTOURS
         // ==========================================================
-        safeFaces.forEach((face: faceLandmarksDetectionTypes.Face) => {
-          const pairs = faceLandmarksDetection.util.getAdjacentPairs(faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh);
+        if (showFaceMeshRef.current) {
+          const pairs = faceLandmarksDetection.util.getAdjacentPairs(
+            faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
+          );
 
-          // Render the dense mesh with a very thin line to avoid muddying the image
-          ctx.strokeStyle = 'rgba(57, 255, 20, 0.35)'; // Cyber Green, transparent
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-
-          pairs.forEach((pair: number[]) => {
-            const i = pair[0];
-            const j = pair[1];
-            if (face.keypoints[i] && face.keypoints[j]) {
-              ctx.moveTo(face.keypoints[i].x, face.keypoints[i].y);
-              ctx.lineTo(face.keypoints[j].x, face.keypoints[j].y);
-            }
-          });
-          ctx.stroke();
-
-          // Add tiny highlight dots on the mesh vertices for that futuristic mapping aesthetic
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-          face.keypoints.forEach((kp) => {
+          safeFaces.forEach((face: faceLandmarksDetectionTypes.Face) => {
+            ctx.strokeStyle = "rgba(16, 185, 129, 0.4)";
+            ctx.lineWidth = 0.8;
             ctx.beginPath();
-            // We map standard z coordinates to size for depth illusion (z is negative when closer to camera)
-            const size = Math.max(0.2, 1.2 - ((kp.z || 0) / 20));
-            ctx.arc(kp.x, kp.y, size, 0, 2 * Math.PI);
-            ctx.fill();
-          });
-        });
 
+            pairs.forEach((pair: number[]) => {
+              const i = pair[0];
+              const j = pair[1];
+              if (face.keypoints[i] && face.keypoints[j]) {
+                ctx.moveTo(face.keypoints[i].x, face.keypoints[i].y);
+                ctx.lineTo(face.keypoints[j].x, face.keypoints[j].y);
+              }
+            });
+            ctx.stroke();
+
+            // Vertex highlight points
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            face.keypoints.forEach((kp) => {
+              ctx.beginPath();
+              const size = Math.max(0.3, 1.2 - (kp.z || 0) / 20);
+              ctx.arc(kp.x, kp.y, size, 0, 2 * Math.PI);
+              ctx.fill();
+            });
+          });
+        }
+
+        // Update React telemetry HUD every ~15 frames for high performance
+        if (frameCount % 6 === 0) {
+          setTelemetry({
+            fps: currentFps,
+            faces: safeFaces.length,
+            hands: safeHands.length,
+            poses: safePoses.length,
+            activeVfx: currentActiveVfx,
+          });
+        }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Frame processing error:", err);
-        setError("AI Crash: " + (err.message || String(err)));
-        // Stop the loop if it crashed completely
+        setError("AI Inference Error: " + (err.message || String(err)));
         return;
       }
 
@@ -535,10 +610,8 @@ export default function HighFidelityVisionDemo() {
 
     initDetectors();
 
-    // Store the video element reference so cleanup is robust
     const currentVideo = videoRef.current;
 
-    // Cleanup on unmount
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       if (handDetector) handDetector.dispose();
@@ -551,71 +624,79 @@ export default function HighFidelityVisionDemo() {
     };
   }, []);
 
-  const toggleFullScreen = () => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-      });
-    } else {
-      document.exitFullscreen();
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden font-sans relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black z-0 pointer-events-none"></div>
+    <div className="min-h-screen bg-[rgb(var(--bg))] text-[rgb(var(--ink))] flex flex-col items-center justify-between p-4 sm:p-6 lg:p-8 overflow-x-hidden font-sans relative transition-colors duration-400">
+      {/* Background Halftone Aesthetic Textures (Adaptive light & dark) */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="halftone halftone-wide mask-tr absolute right-0 top-0 h-[70vh] w-[60vw] opacity-15 dark:opacity-20" />
+        <div className="halftone mask-bl absolute bottom-0 left-0 h-[60vh] w-[50vw] opacity-15 dark:opacity-15" />
+      </div>
 
-      {/* Top Navigation */}
-      <nav className="w-full max-w-6xl z-20 flex items-center justify-between mb-4">
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-800 transition-all shadow-md"
+      {/* Top Header Navigation */}
+      <header className="w-full max-w-6xl z-20 flex flex-wrap items-center justify-between gap-3 mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white bg-white/85 dark:bg-slate-900/80 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/90 dark:border-white/[0.08] shadow-sm transition-all hover:scale-[1.02]"
         >
-          &larr; Back to Portfolio
+          <ArrowLeft size={14} className="text-cyan-500" />
+          <span>Back to Portfolio</span>
         </Link>
-        <span className="text-xs font-mono font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-          Client-Side WebGL Inference
-        </span>
-      </nav>
 
-      <div className="z-10 text-center mb-6 sm:mb-8">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-3 text-white">
-          AI<span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-cyan-400 to-fuchsia-500">Vision Lab</span>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 dark:bg-cyan-500/15 border border-cyan-500/20 text-[11px] font-mono font-semibold text-cyan-700 dark:text-cyan-300">
+            <Radio size={12} className="animate-pulse text-cyan-500" />
+            <span>WebGL Hardware Inference</span>
+          </div>
+
+          <ThemeToggle />
+        </div>
+      </header>
+
+      {/* Hero Headline */}
+      <div className="z-10 text-center max-w-3xl mb-6">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-mono font-semibold mb-3 border border-cyan-500/20">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+          <span>Real-Time In-Browser Computer Vision</span>
+        </div>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-2.5 text-slate-900 dark:text-white">
+          Multimodal <span className="text-gradient-cyan">Vision Lab</span>
         </h1>
-        <p className="text-neutral-400 max-w-2xl text-sm sm:text-base md:text-lg font-light px-2">
-          High-fidelity tracking running locally. Features dense 468-point facial contour mapping and detailed hand tracking.
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
+          Zero-server latency. 100% client-side 3D face mesh, multi-hand skeleton recognition, and interactive Dragon Ball Z energy particle VFX.
         </p>
       </div>
 
-      <div className="z-10 relative flex w-full max-w-6xl justify-center">
+      {/* Main Vision Stage (Camera + Canvas) */}
+      <div className="z-10 relative flex flex-col w-full max-w-5xl justify-center items-center">
+        {/* Loading Overlay */}
         {!isLoaded && !error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-2xl z-30 border border-neutral-800 backdrop-blur-sm">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mb-4"></div>
-            <p className="text-cyan-400 font-mono tracking-widest text-xs sm:text-sm uppercase">Loading Precision Models...</p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 dark:bg-slate-950/80 rounded-3xl z-30 border border-slate-200 dark:border-white/10 backdrop-blur-md">
+            <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
+            <p className="text-cyan-600 dark:text-cyan-400 font-mono tracking-widest text-xs uppercase font-bold">
+              Compiling Neural Models &amp; Camera Feed...
+            </p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Initial compile takes 2–4 seconds</p>
           </div>
         )}
 
+        {/* Error State */}
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-red-950/80 rounded-2xl z-30 border border-red-500 backdrop-blur-md">
-            <div className="text-red-400 font-bold p-4 sm:p-6 text-center max-w-lg text-sm sm:text-base">
-              <svg className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              {error}
+          <div className="absolute inset-0 flex items-center justify-center bg-rose-50/90 dark:bg-rose-950/80 rounded-3xl z-30 border border-rose-400/40 backdrop-blur-md p-6">
+            <div className="text-rose-600 dark:text-rose-300 font-bold text-center max-w-md text-sm">
+              <p className="text-base mb-1">Camera / Model Access Needed</p>
+              <p className="font-normal text-xs text-rose-500 dark:text-rose-400">{error}</p>
             </div>
           </div>
         )}
 
-        <div ref={containerRef} className="group relative rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(0,255,255,0.15)] ring-1 ring-white/10 aspect-video w-full bg-black">
-          {/* Event branding overlay */}
-          <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-40 pointer-events-none drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] opacity-90 transition-opacity">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/ustp-autotronics-logo.png"
-              alt="USTP Autotronics Event Logo"
-              className="h-10 sm:h-20 md:h-32 lg:h-40 w-auto object-contain"
-            />
-          </div>
+        {/* Chassis Frame Container */}
+        <div
+          ref={containerRef}
+          className={`group relative rounded-3xl overflow-hidden aspect-video w-full bg-slate-950 shadow-2xl border border-slate-200 dark:border-white/10 transition-all ${
+            isFullscreen ? "rounded-none border-none aspect-auto h-screen" : ""
+          }`}
+        >
+          {/* Live Video Capture */}
           <video
             ref={videoRef}
             width={1280}
@@ -624,20 +705,185 @@ export default function HighFidelityVisionDemo() {
             playsInline
             muted
           />
+
+          {/* Precision Canvas Overlay */}
           <canvas
             ref={canvasRef}
             className="absolute top-0 left-0 w-full h-full object-cover z-10 pointer-events-none"
           />
 
+          {/* Floating Glass Telemetry HUD (Replaces old black rectangle) */}
+          <div className="absolute top-3 left-3 sm:top-5 sm:left-5 z-20 p-3 sm:p-4 rounded-2xl bg-white/80 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-lg text-[11px] font-mono space-y-1.5 transition-all">
+            <div className="flex items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-1.5">
+              <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <Activity size={12} className="text-cyan-500" />
+                <span>TELEMETRY</span>
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
+                {telemetry.fps > 0 ? `${telemetry.fps} FPS` : "SYNCING"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] text-slate-600 dark:text-slate-300 pt-0.5">
+              <div>
+                <span className="text-slate-400">Faces: </span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                  {telemetry.faces > 0 ? `${telemetry.faces} (468 pts)` : "0"}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400">Hands: </span>
+                <span className="font-bold text-cyan-600 dark:text-cyan-400">
+                  {telemetry.hands > 0 ? `${telemetry.hands} tracked` : "0"}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400">Bodies: </span>
+                <span className="font-bold text-fuchsia-600 dark:text-fuchsia-400">{telemetry.poses}</span>
+              </div>
+              <div>
+                <span className="text-slate-400">VFX: </span>
+                <span className="font-bold text-amber-600 dark:text-amber-400">{telemetry.activeVfx}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Fullscreen Trigger */}
           <button
             onClick={toggleFullScreen}
-            className="absolute bottom-4 right-4 z-50 p-3 bg-black/60 hover:bg-cyan-900/80 rounded-full text-white border border-white/20 backdrop-blur-md transition-all opacity-30 hover:opacity-100 group-hover:opacity-100"
-            title="Toggle Fullscreen"
+            className="absolute bottom-4 right-4 z-20 p-2.5 sm:p-3 bg-white/80 dark:bg-slate-900/80 hover:bg-cyan-600 dark:hover:bg-cyan-500 hover:text-white text-slate-700 dark:text-slate-300 rounded-2xl border border-slate-200/80 dark:border-white/10 backdrop-blur-md shadow-lg transition-all"
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-            </svg>
+            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>
+        </div>
+
+        {/* Feature Toggles Console */}
+        <div className="w-full mt-4 p-3.5 sm:p-4 rounded-3xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 shadow-lg flex flex-wrap items-center justify-between gap-2.5 text-xs font-semibold">
+          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-1 flex items-center gap-1.5">
+            <Layers size={13} className="text-cyan-500" />
+            <span>Active Layers:</span>
+          </span>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Face Mesh Toggle */}
+            <button
+              onClick={() => setShowFaceMesh(!showFaceMesh)}
+              className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
+                showFaceMesh
+                  ? "bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                  : "bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-white/10 text-slate-400"
+              }`}
+            >
+              <Eye size={13} />
+              <span>Face Mesh</span>
+            </button>
+
+            {/* Hand Tracking Toggle */}
+            <button
+              onClick={() => setShowHands(!showHands)}
+              className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
+                showHands
+                  ? "bg-cyan-500/10 dark:bg-cyan-500/20 border-cyan-500/40 text-cyan-700 dark:text-cyan-300"
+                  : "bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-white/10 text-slate-400"
+              }`}
+            >
+              <Hand size={13} />
+              <span>Hands</span>
+            </button>
+
+            {/* Body Pose Toggle */}
+            <button
+              onClick={() => setShowPoses(!showPoses)}
+              className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
+                showPoses
+                  ? "bg-fuchsia-500/10 dark:bg-fuchsia-500/20 border-fuchsia-500/40 text-fuchsia-700 dark:text-fuchsia-300"
+                  : "bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-white/10 text-slate-400"
+              }`}
+            >
+              <Activity size={13} />
+              <span>Poses</span>
+            </button>
+
+            {/* DBZ Energy VFX Toggle */}
+            <button
+              onClick={() => setShowVFX(!showVFX)}
+              className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
+                showVFX
+                  ? "bg-amber-500/10 dark:bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-300"
+                  : "bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-white/10 text-slate-400"
+              }`}
+            >
+              <Zap size={13} />
+              <span>Energy VFX</span>
+            </button>
+
+            {/* Sound FX Toggle */}
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
+                soundEnabled
+                  ? "bg-purple-500/10 dark:bg-purple-500/20 border-purple-500/40 text-purple-700 dark:text-purple-300"
+                  : "bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-white/10 text-slate-400"
+              }`}
+              title={soundEnabled ? "Mute audio effects" : "Enable audio effects"}
+            >
+              {soundEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
+              <span>{soundEnabled ? "SFX On" : "Muted"}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Interactive Gesture & Engineering Guide */}
+      <div className="w-full max-w-5xl mt-8 mb-6 z-10">
+        <h3 className="text-xs font-bold font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 px-1">
+          Interactive Gesture Controls &amp; Capabilities:
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Card 1: Spirit Bomb */}
+          <div className="p-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/[0.08] shadow-sm space-y-1.5 hover:border-cyan-500/40 transition-all">
+            <div className="w-7 h-7 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
+              <Flame size={15} />
+            </div>
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Spirit Bomb</h4>
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              Raise both arms high above your head to spawn and grow a celestial energy sphere.
+            </p>
+          </div>
+
+          {/* Card 2: Kamehameha */}
+          <div className="p-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/[0.08] shadow-sm space-y-1.5 hover:border-cyan-500/40 transition-all">
+            <div className="w-7 h-7 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-2">
+              <Zap size={15} />
+            </div>
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Kamehameha</h4>
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              Bring both palms close together in front of the lens to charge dense plasma lightning.
+            </p>
+          </div>
+
+          {/* Card 3: 468-Point Mesh */}
+          <div className="p-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/[0.08] shadow-sm space-y-1.5 hover:border-cyan-500/40 transition-all">
+            <div className="w-7 h-7 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-2">
+              <Eye size={15} />
+            </div>
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white">3D Face Mesh</h4>
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              468 high-precision vertex points map micro-expressions and depth in real-time.
+            </p>
+          </div>
+
+          {/* Card 4: Local Privacy */}
+          <div className="p-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/[0.08] shadow-sm space-y-1.5 hover:border-cyan-500/40 transition-all">
+            <div className="w-7 h-7 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-2">
+              <ShieldCheck size={15} />
+            </div>
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white">Local Inference</h4>
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              100% private. All video frames are computed in memory on your WebGL GPU.
+            </p>
+          </div>
         </div>
       </div>
     </div>
