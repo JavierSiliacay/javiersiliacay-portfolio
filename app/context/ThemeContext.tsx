@@ -27,7 +27,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
-  const [themeMode, setThemeModeState] = useState<ThemeMode>("dark");
+  const [themeMode, setThemeModeState] = useState<ThemeMode>("system");
   const [triggerInfo, setTriggerInfo] = useState<ThemeTriggerInfo | null>(null);
 
   // Apply theme class to HTML element
@@ -60,7 +60,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const savedMode = localStorage.getItem("theme-preference") as ThemeMode | null;
     const modeToUse: ThemeMode = (savedMode === "light" || savedMode === "dark" || savedMode === "system") 
       ? savedMode 
-      : "dark";
+      : "system";
     
     const resolved = resolveTheme(modeToUse);
     setThemeModeState(modeToUse);
@@ -71,7 +71,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleSystemChange = (e: MediaQueryListEvent) => {
       const currentSaved = localStorage.getItem("theme-preference") as ThemeMode | null;
-      if (currentSaved === "system") {
+      const effectiveMode: ThemeMode = (currentSaved === "light" || currentSaved === "dark" || currentSaved === "system")
+        ? currentSaved
+        : "system";
+      if (effectiveMode === "system") {
         const newResolved: Theme = e.matches ? "dark" : "light";
         setThemeState(newResolved);
         applyThemeToDOM(newResolved);

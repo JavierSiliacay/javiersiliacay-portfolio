@@ -56,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} dark scroll-smooth`}>
+    <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} scroll-smooth`}>
       <head>
         <link rel="icon" href="/javier.png" type="image/png" />
         <link rel="apple-touch-icon" href="/javier.png" />
@@ -67,7 +67,7 @@ export default function RootLayout({
                 try {
                   var saved = localStorage.getItem('theme-preference');
                   var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  var theme = 'dark';
+                  var theme = prefersDark ? 'dark' : 'light';
                   if (saved === 'light') {
                     theme = 'light';
                   } else if (saved === 'dark') {
