@@ -11,6 +11,7 @@ export default function HeroAvatar() {
   const [mounted, setMounted] = useState(false);
   const [hasEnded, setHasEnded] = useState(true);
   const [isTransforming, setIsTransforming] = useState(false);
+  const [videoCompleted, setVideoCompleted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const prevIsDarkRef = useRef<boolean | null>(null);
 
@@ -24,6 +25,7 @@ export default function HeroAvatar() {
   const handleVideoEnded = useCallback(() => {
     setHasEnded(true);
     setIsTransforming(false);
+    setVideoCompleted(true);
     if (videoRef.current) {
       videoRef.current.pause();
     }
@@ -42,6 +44,7 @@ export default function HeroAvatar() {
         // User clicked from light into dark mode!
         setHasEnded(false);
         setIsTransforming(true);
+        setVideoCompleted(false);
         video.currentTime = 0;
         
         // Attempt play with audio, fallback to muted if browser restricts
@@ -52,21 +55,24 @@ export default function HeroAvatar() {
             video.play().catch(() => {
               setHasEnded(true);
               setIsTransforming(false);
+              setVideoCompleted(true);
             });
           });
         }
 
-        // Safety fallback timer: guarantee animation never gets stuck in Transforming state
+        // The video is 7.2s long: set fallback safety timer to 8.5s so it never prematurely cuts off the video
         const safetyTimer = setTimeout(() => {
           setHasEnded(true);
           setIsTransforming(false);
-        }, 3800);
+          setVideoCompleted(true);
+        }, 8500);
 
         return () => clearTimeout(safetyTimer);
       } else {
-        // Initial mount in dark mode: immediately display static shades portrait
+        // Initial mount in dark mode: display static dark portrait
         setHasEnded(true);
         setIsTransforming(false);
+        setVideoCompleted(false);
       }
     } else {
       // Light Mode: reset video
@@ -74,6 +80,7 @@ export default function HeroAvatar() {
       video.currentTime = 0;
       setHasEnded(true);
       setIsTransforming(false);
+      setVideoCompleted(false);
     }
 
     prevIsDarkRef.current = isDark;
@@ -114,10 +121,10 @@ export default function HeroAvatar() {
             priority
           />
 
-          {/* 2. Dark Mode Base Portrait (With shades - shown on load and when video ends) */}
+          {/* 2. Dark Mode Base Portrait (Clean dark studio portrait - NO shades) */}
           <Image
-            src="/javier-dark-shades.jpg"
-            alt="Javier Siliacay — Software Developer & AI Engineer (Cyber Dark Shades)"
+            src="/javier-dark.jpg"
+            alt="Javier Siliacay — Software Developer & AI Engineer (Cyber Dark)"
             fill
             sizes="(max-width: 640px) 288px, 320px"
             className={`object-cover object-top transition-opacity duration-500 ease-in-out ${
@@ -126,18 +133,18 @@ export default function HeroAvatar() {
             priority
           />
 
-          {/* 3. Dark Mode Transformation Video (Plays seamlessly on Light -> Dark toggle) */}
+          {/* 3. Dark Mode Transformation Video (Plays full 7.2s seamlessly on Light -> Dark toggle) */}
           <video
             ref={videoRef}
             src="/javier-dark-transform.mp4"
-            poster="/javier-dark-shades.jpg"
+            poster="/javier-dark.jpg"
             playsInline
             muted
             preload="auto"
             onEnded={handleVideoEnded}
             onError={handleVideoEnded}
-            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-400 ease-in-out ${
-              isDark && isTransforming ? "opacity-100" : "opacity-0 pointer-events-none"
+            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out ${
+              isDark && (isTransforming || videoCompleted) ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
           />
 
