@@ -129,15 +129,15 @@ export default function Sidebar({ onOpenAsk }: SidebarProps) {
             <ArrowUpRight size={13} className="text-slate-400" />
           </Link>
 
-          {/* Live Work Availability Pill */}
+          {/* Status Indicator */}
           <div className="mt-5 border-y border-slate-200 dark:border-white/[0.08] py-3.5">
             <div className="flex items-center gap-2">
-              <div className="relative flex h-2 w-2">
+              <div className="relative flex h-2 w-2 flex-shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </div>
-              <p className="font-mono text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-                <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Available</strong> for contracts &amp; new roles
+              <p className="font-mono text-[11px] text-slate-600 dark:text-slate-300 truncate">
+                Open to opportunities
               </p>
             </div>
           </div>

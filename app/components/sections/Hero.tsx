@@ -45,7 +45,7 @@ export default function Hero() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             <span className="text-cyan-700 dark:text-cyan-400 font-mono text-[11px]">
-              Available for Full-Stack, AI &amp; Hardware Projects
+              Available for contracts &amp; new roles
             </span>
           </div>
 
