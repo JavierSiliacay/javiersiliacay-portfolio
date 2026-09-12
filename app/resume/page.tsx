@@ -119,7 +119,7 @@ export default function ResumePage() {
                                     <h4 className="text-lg font-bold text-slate-900 print:text-sm">Full-Stack Lead Developer</h4>
                                     <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded print:text-[9px]">2025 — CURRENT</span>
                                 </div>
-                                <div className="text-[#800000] font-black mb-3 uppercase tracking-widest text-[11px] print:text-[10px] print:mb-2">Autoworx System (autoworxcagayan.com)</div>
+                                <div className="text-[#800000] font-black mb-3 uppercase tracking-widest text-[11px] print:text-[10px] print:mb-2">Autoworx & Partner Companies</div>
                                 <ul className="space-y-1.5 print:space-y-1">
                                     <li className="text-sm text-slate-600 flex gap-2 print:text-[10px] print:leading-normal">
                                         <span className="text-[#800000] font-bold">•</span>

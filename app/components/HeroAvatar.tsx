@@ -9,7 +9,8 @@ import { Sun, Moon } from "lucide-react";
 export default function HeroAvatar() {
   const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [hasEnded, setHasEnded] = useState(false);
+  const [hasEnded, setHasEnded] = useState(true);
+  const [isTransforming, setIsTransforming] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const prevIsDarkRef = useRef<boolean | null>(null);
 
@@ -19,48 +20,73 @@ export default function HeroAvatar() {
 
   const isDark = mounted ? theme === "dark" : true;
 
-  // Handler when video completes its single playthrough
+  // Handler when video completes its playthrough
   const handleVideoEnded = useCallback(() => {
     setHasEnded(true);
+    setIsTransforming(false);
     if (videoRef.current) {
       videoRef.current.pause();
     }
   }, []);
 
-  // Handle play-once on entering dark mode, and reset on leaving dark mode
+  // Handle video playback: only play transformation when explicitly switching from Light to Dark
   useEffect(() => {
     if (!mounted) return;
 
     const video = videoRef.current;
     if (!video) return;
 
-    // Transitioning into Dark Mode
+    // Switching into Dark Mode FROM Light Mode
     if (isDark) {
-      // Only trigger if we switched into dark from light, or on first mount
-      if (prevIsDarkRef.current !== true) {
+      if (prevIsDarkRef.current === false) {
+        // User clicked from light into dark mode!
         setHasEnded(false);
+        setIsTransforming(true);
         video.currentTime = 0;
-        video.muted = false;
-        video.volume = 1.0;
+        
+        // Attempt play with audio, fallback to muted if browser restricts
         const playPromise = video.play();
         if (playPromise !== undefined) {
           playPromise.catch(() => {
-            // Autoplay restrictions on initial un-interacted page load fallback
             video.muted = true;
-            video.play().catch(() => {});
+            video.play().catch(() => {
+              setHasEnded(true);
+              setIsTransforming(false);
+            });
           });
         }
+
+        // Safety fallback timer: guarantee animation never gets stuck in Transforming state
+        const safetyTimer = setTimeout(() => {
+          setHasEnded(true);
+          setIsTransforming(false);
+        }, 3800);
+
+        return () => clearTimeout(safetyTimer);
+      } else {
+        // Initial mount in dark mode: immediately display static shades portrait
+        setHasEnded(true);
+        setIsTransforming(false);
       }
     } else {
-      // Transitioning into Light Mode -> reset animation
+      // Light Mode: reset video
       video.pause();
       video.currentTime = 0;
-      video.muted = false;
-      setHasEnded(false);
+      setHasEnded(true);
+      setIsTransforming(false);
     }
 
     prevIsDarkRef.current = isDark;
   }, [isDark, mounted]);
+
+  const handleAvatarClick = (e: React.MouseEvent) => {
+    // If we're in light mode and about to switch to dark, unmute video for rich audio
+    if (!isDark && videoRef.current) {
+      videoRef.current.muted = false;
+      videoRef.current.volume = 1.0;
+    }
+    toggleTheme(e);
+  };
 
   return (
     <div className="flex flex-col items-center select-none">
@@ -68,7 +94,7 @@ export default function HeroAvatar() {
       <motion.div
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        onClick={toggleTheme}
+        onClick={handleAvatarClick}
         className="relative w-72 sm:w-80 aspect-[4/5] rounded-3xl overflow-hidden cursor-pointer group p-2.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl transition-all duration-500"
         title="Click to toggle theme transformation!"
       >
@@ -79,25 +105,39 @@ export default function HeroAvatar() {
           {/* 1. Light Mode Portrait (Daylight studio, warm smile) */}
           <Image
             src="/javier-light.jpg"
-            alt="Javier Siliacay — Software Developer & AI Engineer"
+            alt="Javier Siliacay — Software Developer & AI Engineer (Daylight Studio)"
             fill
             sizes="(max-width: 640px) 288px, 320px"
-            className={`object-cover object-top transition-opacity duration-700 ease-in-out ${
+            className={`object-cover object-top transition-opacity duration-500 ease-in-out ${
               isDark ? "opacity-0 pointer-events-none" : "opacity-100"
             }`}
             priority
           />
 
-          {/* 2. Dark Mode Transformation Video (Plays once with audio, then freezes static on final frame) */}
+          {/* 2. Dark Mode Base Portrait (With shades - shown on load and when video ends) */}
+          <Image
+            src="/javier-dark-shades.jpg"
+            alt="Javier Siliacay — Software Developer & AI Engineer (Cyber Dark Shades)"
+            fill
+            sizes="(max-width: 640px) 288px, 320px"
+            className={`object-cover object-top transition-opacity duration-500 ease-in-out ${
+              isDark ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+            priority
+          />
+
+          {/* 3. Dark Mode Transformation Video (Plays seamlessly on Light -> Dark toggle) */}
           <video
             ref={videoRef}
             src="/javier-dark-transform.mp4"
-            poster="/javier-dark.jpg"
+            poster="/javier-dark-shades.jpg"
             playsInline
+            muted
             preload="auto"
             onEnded={handleVideoEnded}
-            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-in-out ${
-              isDark ? "opacity-100" : "opacity-0 pointer-events-none"
+            onError={handleVideoEnded}
+            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-400 ease-in-out ${
+              isDark && isTransforming ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
           />
 
@@ -114,7 +154,7 @@ export default function HeroAvatar() {
               {/* Theme State Indicator Pill */}
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-800/90 border border-white/10 text-[10px] font-mono text-slate-300">
                 {isDark ? (
-                  hasEnded ? (
+                  !isTransforming && hasEnded ? (
                     <>
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                       <span className="text-cyan-300 font-semibold">Dark Mode</span>

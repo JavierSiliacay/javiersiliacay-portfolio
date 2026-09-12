@@ -27,13 +27,13 @@ const experienceData: ExperienceItem[] = [
   {
     period: "2025 — PRESENT",
     role: "Full-Stack Lead Developer",
-    organization: "Autoworx Enterprise System (autoworxcagayan.com)",
+    organization: "Autoworx & Partner Companies",
     description:
-      "Architecting and deploying the production operations platform for Autoworx, managing real-time vehicle job workflows, automated financial ledgers, and AI diagnostics.",
+      "Architecting and deploying production operations software, enterprise ERP platforms, logistics systems, and AI diagnostic tools across Autoworx and partner client fleets.",
     highlights: [
       "Deployed Next.js 16 + Supabase production architecture with secure RLS",
       "Integrated AI Diagnostics Engine reducing reporting overhead by 40%",
-      "Maintained 15+ responsive UI modules for mechanics, admins, and vehicle owners",
+      "Maintained 15+ responsive UI modules for mechanics, dispatchers, admins, and clients",
     ],
   },
   {
