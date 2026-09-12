@@ -65,7 +65,7 @@ export default function Hero() {
 
           {/* Value Proposition */}
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-2xl leading-relaxed">
-            Architecting high-reliability software from low-level silicon firmware to high-concurrency cloud applications. Lead developer of production automotive ERP platforms, creator of browser-accelerated computer vision tools, and published international IoT researcher.
+            Hey, I&apos;m Javier! I&apos;m a software developer and AI engineer building production-grade web platforms and intelligent applications. I currently lead engineering for Autoworx and its partner companies, develop real-time computer vision tools, and occasionally tinker with IoT hardware on the side.
           </p>
 
           {/* Streamlined Action CTAs (2 clear high-conversion buttons) */}
