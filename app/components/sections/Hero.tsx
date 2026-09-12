@@ -65,7 +65,7 @@ export default function Hero() {
 
           {/* Value Proposition */}
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-2xl leading-relaxed">
-            Hey, I&apos;m Javier! I&apos;m a software developer and AI engineer building production-grade web platforms and intelligent applications. I currently lead engineering for Autoworx and its partner companies, develop real-time computer vision tools, and occasionally tinker with IoT hardware on the side.
+            Hey, I&apos;m <strong className="text-slate-900 dark:text-white font-bold">Javier</strong>! I&apos;m a software developer and AI engineer building production-grade web platforms and intelligent applications. I currently lead engineering for Autoworx and its partner companies, develop real-time computer vision tools, and occasionally tinker with IoT hardware on the side.
           </p>
 
           {/* Streamlined Action CTAs (2 clear high-conversion buttons) */}
