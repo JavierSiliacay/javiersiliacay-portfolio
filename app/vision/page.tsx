@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import type * as handPoseDetectionTypes from "@tensorflow-models/hand-pose-detection";
 import type * as faceLandmarksDetectionTypes from "@tensorflow-models/face-landmarks-detection";
 import type * as poseDetectionTypes from "@tensorflow-models/pose-detection";
@@ -561,12 +562,25 @@ export default function HighFidelityVisionDemo() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden font-sans">
+    <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden font-sans relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black z-0 pointer-events-none"></div>
+
+      {/* Top Navigation */}
+      <nav className="w-full max-w-6xl z-20 flex items-center justify-between mb-4">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-800 transition-all shadow-md"
+        >
+          &larr; Back to Portfolio
+        </Link>
+        <span className="text-xs font-mono font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+          Client-Side WebGL Inference
+        </span>
+      </nav>
 
       <div className="z-10 text-center mb-6 sm:mb-8">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-3 text-white">
-          AI<span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-fuchsia-500">Vision</span>
+          AI<span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-cyan-400 to-fuchsia-500">Vision Lab</span>
         </h1>
         <p className="text-neutral-400 max-w-2xl text-sm sm:text-base md:text-lg font-light px-2">
           High-fidelity tracking running locally. Features dense 468-point facial contour mapping and detailed hand tracking.
