@@ -323,3 +323,16 @@ html.dark .text-gradient-cyan {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 100, 115, 0.5);
 }
+
+/* ── View Transitions API: Circular Splash Effect ── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+}

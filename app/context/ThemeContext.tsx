@@ -89,11 +89,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const executeThemeChange = (newMode: ThemeMode, e?: React.MouseEvent | MouseEvent) => {
     const newResolved = resolveTheme(newMode);
     
-    // Extract origin coordinates for radial ripple wave
+    // Extract origin coordinates for circular splash wave
     let originX = typeof window !== "undefined" ? window.innerWidth / 2 : 0;
     let originY = 60;
 
-    if (e && typeof e.clientX === "number" && typeof e.clientY === "number") {
+    if (e && typeof e.clientX === "number" && typeof e.clientY === "number" && e.clientX > 0 && e.clientY > 0) {
       originX = e.clientX;
       originY = e.clientY;
     }
@@ -114,10 +114,52 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       label,
     });
 
-    setThemeModeState(newMode);
-    setThemeState(newResolved);
-    localStorage.setItem("theme-preference", newMode);
-    applyThemeToDOM(newResolved);
+    const commitThemeState = () => {
+      setThemeModeState(newMode);
+      setThemeState(newResolved);
+      localStorage.setItem("theme-preference", newMode);
+      applyThemeToDOM(newResolved);
+    };
+
+    // Check if View Transitions API is supported and reduced motion is not preferred
+    const doc = typeof document !== "undefined" ? (document as any) : null;
+    const isAppearanceTransition =
+      doc &&
+      typeof doc.startViewTransition === "function" &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!isAppearanceTransition) {
+      commitThemeState();
+      return;
+    }
+
+    const transition = doc.startViewTransition(() => {
+      commitThemeState();
+    });
+
+    transition.ready
+      .then(() => {
+        const right = window.innerWidth - originX;
+        const bottom = window.innerHeight - originY;
+        const maxRadius = Math.hypot(Math.max(originX, right), Math.max(originY, bottom));
+
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${originX}px ${originY}px)`,
+              `circle(${maxRadius}px at ${originX}px ${originY}px)`,
+            ],
+          },
+          {
+            duration: 600,
+            easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+            pseudoElement: "::view-transition-new(root)",
+          }
+        );
+      })
+      .catch(() => {
+        // Fallback gracefully if animation fails
+      });
   };
 
   const setThemeMode = (mode: ThemeMode, e?: React.MouseEvent | MouseEvent) => {

@@ -37,21 +37,58 @@ export default function ThemeTriggerUX() {
 
   return (
     <>
-      {/* 1. Subtle Ambient Vignette Flash on Trigger */}
+      {/* 1. Fluid Splash Shockwave Ripple Effect */}
       <AnimatePresence>
         {ripple && (
-          <motion.div
-            key={ripple.id}
-            initial={{ opacity: 0.6 }}
-            animate={{ opacity: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className={`fixed inset-0 pointer-events-none z-[9998] transition-colors duration-300 ${
-              ripple.isDark 
-                ? "bg-cyan-950/20 mix-blend-color-dodge" 
-                : "bg-amber-100/30 mix-blend-soft-light"
-            }`}
-          />
+          <div className="fixed inset-0 pointer-events-none z-[9998] overflow-hidden">
+            {/* Expanding Circular Splash Shockwave */}
+            <motion.div
+              key={`ring-${ripple.id}`}
+              initial={{
+                width: 0,
+                height: 0,
+                x: ripple.x,
+                y: ripple.y,
+                opacity: 0.9,
+                scale: 0,
+              }}
+              animate={{
+                width: "250vmax",
+                height: "250vmax",
+                x: ripple.x,
+                y: ripple.y,
+                opacity: 0,
+                scale: 1,
+              }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: 0.7,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              style={{
+                translateX: "-50%",
+                translateY: "-50%",
+              }}
+              className={`absolute rounded-full border-2 ${
+                ripple.isDark
+                  ? "border-cyan-400/90 shadow-[0_0_60px_rgba(6,182,212,0.5)]"
+                  : "border-amber-400/90 shadow-[0_0_60px_rgba(245,158,11,0.5)]"
+              }`}
+            />
+            {/* Ambient Radial Splash Glow */}
+            <motion.div
+              key={`flash-${ripple.id}`}
+              initial={{ opacity: 0.35 }}
+              animate={{ opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className={`absolute inset-0 ${
+                ripple.isDark
+                  ? "bg-cyan-500/10 mix-blend-screen"
+                  : "bg-amber-300/15 mix-blend-multiply"
+              }`}
+            />
+          </div>
         )}
       </AnimatePresence>
 
