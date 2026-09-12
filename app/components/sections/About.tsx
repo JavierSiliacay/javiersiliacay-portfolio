@@ -131,7 +131,13 @@ export default function About() {
 
               {/* USTP & Autotronics Program Logos */}
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/[0.08] shadow-xs">
+                <a
+                  href="https://www.ustp.edu.ph/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-white/[0.08] hover:border-cyan-500/50 shadow-xs transition-all hover:scale-[1.03] group/ustp cursor-pointer"
+                  title="University of Science and Technology of Southern Philippines (USTP)"
+                >
                   <Image
                     src="/ustp.png"
                     alt="USTP Logo"
@@ -139,9 +145,19 @@ export default function About() {
                     height={18}
                     className="object-contain"
                   />
-                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 tracking-tight">USTP</span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/[0.08] shadow-xs">
+                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 tracking-tight group-hover/ustp:text-cyan-600 dark:group-hover/ustp:text-cyan-400 transition-colors">
+                    USTP
+                  </span>
+                  <ExternalLink size={10} className="text-slate-400 group-hover/ustp:text-cyan-500 transition-colors" />
+                </a>
+
+                <a
+                  href="https://www.ustp.edu.ph/cdeo/cot/bsautotronics/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-white/[0.08] hover:border-cyan-500/50 shadow-xs transition-all hover:scale-[1.03] group/at cursor-pointer"
+                  title="USTP College of Technology - B.S. in Autotronics"
+                >
                   <Image
                     src="/at_logo.png"
                     alt="Autotronics Logo"
@@ -149,8 +165,11 @@ export default function About() {
                     height={18}
                     className="object-contain"
                   />
-                  <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 tracking-tight">Autotronics</span>
-                </div>
+                  <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 tracking-tight group-hover/at:text-cyan-500 transition-colors">
+                    Autotronics
+                  </span>
+                  <ExternalLink size={10} className="text-cyan-500/70 group-hover/at:text-cyan-400 transition-colors" />
+                </a>
               </div>
             </div>
           </div>
