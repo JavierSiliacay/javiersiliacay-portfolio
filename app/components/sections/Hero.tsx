@@ -1,28 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ChevronRight, FileText, ArrowUpRight, Award, Shield, Cpu, Mail } from "lucide-react";
+import { ChevronRight, FileText, ArrowUpRight, Mail } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
 import HeroAvatar from "../HeroAvatar";
-
-const credibilityHighlights = [
-  {
-    icon: Award,
-    title: "Production Lead Developer",
-    detail: "Autoworx Enterprise ERP",
-  },
-  {
-    icon: Shield,
-    title: "Published IoT Researcher",
-    detail: "Univ. of Aizu, Japan (2025)",
-  },
-  {
-    icon: Cpu,
-    title: "Full-Stack to Silicon",
-    detail: "Next.js 16 • AI Vision • ESP32",
-  },
-];
 
 const GLYPHS = "0101XYZ_#<>/*+~&!";
 
@@ -182,18 +164,6 @@ const ctaVariants: Variants = {
   },
 };
 
-const proofVariants: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.65,
-      delay: 1.55,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-};
 
 export default function Hero() {
   // Configurable decrypt durations (in milliseconds)
@@ -318,36 +288,6 @@ export default function Hero() {
               <Mail size={16} />
               <span>Contact</span>
             </a>
-          </motion.div>
-
-          {/* Quiet Social-Proof Ribbon */}
-          <motion.div
-            variants={proofVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-slate-200/80 dark:border-white/[0.08]"
-          >
-            {credibilityHighlights.map((stat, idx) => {
-              const Icon = stat.icon;
-              return (
-                <div
-                  key={idx}
-                  className="p-3 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-slate-200/70 dark:border-white/[0.06] hover:border-cyan-500/40 shadow-2xs transition-all flex items-center gap-3"
-                >
-                  <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 shrink-0">
-                    <Icon size={16} />
-                  </div>
-                  <div className="overflow-hidden">
-                    <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight truncate">
-                      {stat.title}
-                    </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate font-mono">
-                      {stat.detail}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </motion.div>
         </div>
 
