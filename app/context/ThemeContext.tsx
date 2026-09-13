@@ -55,30 +55,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return mode;
   }, []);
 
-  // Initialize theme from localStorage or system preference
+  // Initialize theme: ALWAYS default to system preference on load and refresh
   useEffect(() => {
-    const savedMode = localStorage.getItem("theme-preference") as ThemeMode | null;
-    const modeToUse: ThemeMode = (savedMode === "light" || savedMode === "dark" || savedMode === "system") 
-      ? savedMode 
-      : "system";
-    
+    try {
+      localStorage.removeItem("theme-preference");
+    } catch (e) {}
+
+    const modeToUse: ThemeMode = "system";
     const resolved = resolveTheme(modeToUse);
-    setThemeModeState(modeToUse);
+    setThemeModeState("system");
     setThemeState(resolved);
     applyThemeToDOM(resolved);
 
     // Media query listener for system mode
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleSystemChange = (e: MediaQueryListEvent) => {
-      const currentSaved = localStorage.getItem("theme-preference") as ThemeMode | null;
-      const effectiveMode: ThemeMode = (currentSaved === "light" || currentSaved === "dark" || currentSaved === "system")
-        ? currentSaved
-        : "system";
-      if (effectiveMode === "system") {
-        const newResolved: Theme = e.matches ? "dark" : "light";
-        setThemeState(newResolved);
-        applyThemeToDOM(newResolved);
-      }
+      const newResolved: Theme = e.matches ? "dark" : "light";
+      setThemeState(newResolved);
+      applyThemeToDOM(newResolved);
     };
 
     mediaQuery.addEventListener("change", handleSystemChange);
@@ -117,7 +111,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const commitThemeState = () => {
       setThemeModeState(newMode);
       setThemeState(newResolved);
-      localStorage.setItem("theme-preference", newMode);
       applyThemeToDOM(newResolved);
     };
 

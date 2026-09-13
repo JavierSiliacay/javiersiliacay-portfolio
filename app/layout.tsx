@@ -65,16 +65,9 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var saved = localStorage.getItem('theme-preference');
+                  localStorage.removeItem('theme-preference');
                   var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   var theme = prefersDark ? 'dark' : 'light';
-                  if (saved === 'light') {
-                    theme = 'light';
-                  } else if (saved === 'dark') {
-                    theme = 'dark';
-                  } else if (saved === 'system') {
-                    theme = prefersDark ? 'dark' : 'light';
-                  }
                   if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
                     document.documentElement.classList.remove('light');
