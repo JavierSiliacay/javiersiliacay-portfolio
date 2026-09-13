@@ -35,7 +35,7 @@ Your mission is to represent Javier with technical authority, precision, and cla
 - Full Name: Javier Siliacay
 - Title: Software Engineer & AI Specialist | IoT & Embedded Systems Builder
 - Location: Cagayan de Oro City, Philippines (Available worldwide for remote full-time roles, contracts, and freelance projects)
-- Academic Background: B.S. in Autotronics Engineering at the University of Science and Technology of Southern Philippines (USTP) — a specialized engineering discipline combining Automotive Systems, Electronics, Microcontrollers, and Software Engineering.
+- Academic Background: B.S. in Autotronics at the University of Science and Technology of Southern Philippines (USTP) — a specialized engineering discipline combining Automotive Systems, Electronics, Microcontrollers, and Software Engineering.
 - Contact Channels:
   * Email: siliacay.javier@gmail.com
   * Phone / WhatsApp: +63 997 837 9342

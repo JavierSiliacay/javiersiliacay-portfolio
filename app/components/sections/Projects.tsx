@@ -15,6 +15,7 @@ import {
   Wrench,
   Shield,
   Layers,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -322,15 +323,12 @@ export default function Projects() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 text-xs font-semibold mb-3">
             <FolderGit2 size={13} />
-            <span>Featured Case Studies &amp; Research</span>
+            <span>Selected Works</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-            Flagship <span className="text-gradient-cyan">Engineering Systems</span>
+            Featured <span className="text-gradient-cyan">Projects</span>
           </h2>
         </div>
-        <p className="text-slate-600 dark:text-slate-400 text-sm max-w-md leading-relaxed">
-          Production enterprise ERPs, in-browser computer vision suites, and published IoT hardware research with proven real-world impact.
-        </p>
       </div>
 
       {/* ── TIER 1: FLAGSHIP EDITORIAL CASE STUDIES ── */}
@@ -338,10 +336,10 @@ export default function Projects() {
         {flagshipProjects.map((project, idx) => (
           <motion.div
             key={project.id}
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: idx * 0.1 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.42, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
             className="rounded-3xl p-6 sm:p-8 lg:p-10 glass-panel border border-slate-200/90 dark:border-white/10 hover:border-cyan-500/40 transition-all duration-300 relative overflow-hidden group shadow-lg"
           >
             {/* Ambient Background Glow */}
@@ -375,35 +373,21 @@ export default function Projects() {
                   </span>
                 </div>
 
-                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  {project.title}
-                </h3>
-
-                <p className="text-sm font-semibold text-cyan-700 dark:text-cyan-400 font-mono">
-                  {project.tagline}
-                </p>
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                    {project.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm font-semibold text-cyan-700 dark:text-cyan-400 font-mono mt-1">
+                    {project.tagline}
+                  </p>
+                </div>
 
                 <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                   {project.solution}
                 </p>
 
-                {/* Key Architectural Highlights */}
-                <div className="pt-2 space-y-2">
-                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                    Core Technical Architecture:
-                  </span>
-                  <ul className="space-y-1.5">
-                    {project.architectures.map((arch, aIdx) => (
-                      <li key={aIdx} className="text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2">
-                        <CheckCircle2 size={14} className="text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
-                        <span>{arch}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
                 {/* Tech Stack Pills with Logos */}
-                <div className="flex flex-wrap gap-1.5 pt-3">
+                <div className="flex flex-wrap gap-1.5 pt-2">
                   {project.tech.map((t) => (
                     <span
                       key={t}
@@ -417,10 +401,10 @@ export default function Projects() {
               </div>
 
               {/* Right Metrics & Actions Column */}
-              <div className="lg:col-span-5 flex flex-col justify-between h-full bg-slate-50/80 dark:bg-slate-950/60 p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] space-y-6">
+              <div className="lg:col-span-5 flex flex-col justify-between bg-slate-50/80 dark:bg-slate-950/60 p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] space-y-5">
                 {/* Visual Mockup Device Showcase Frame */}
                 {project.imagePreview && (
-                  <div className="relative w-full h-44 sm:h-52 rounded-xl overflow-hidden bg-slate-100/70 dark:bg-slate-950/80 border border-slate-200/80 dark:border-white/10 p-2 flex items-center justify-center shadow-xs group/preview">
+                  <div className="relative w-full h-48 sm:h-56 rounded-xl overflow-hidden bg-slate-100/70 dark:bg-slate-950/80 border border-slate-200/80 dark:border-white/10 p-2 flex items-center justify-center shadow-xs group/preview">
                     <Image
                       src={project.imagePreview}
                       alt={project.title}
@@ -432,30 +416,17 @@ export default function Projects() {
                 )}
 
                 <div>
-                  <span className="text-[11px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">
-                    Verified Production Impact
-                  </span>
-                  <div className="mt-2 text-base font-bold text-slate-900 dark:text-white leading-snug">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
+                    <TrendingUp size={12} className="text-cyan-600 dark:text-cyan-400" />
+                    <span>Key Result</span>
+                  </div>
+                  <div className="mt-1 text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
                     {project.impactMetric}
                   </div>
                 </div>
 
-                <div className="space-y-2.5 pt-4 border-t border-slate-200 dark:border-white/[0.06]">
-                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    Key Capabilities:
-                  </div>
-                  <ul className="space-y-1.5">
-                    {project.keyFeatures.map((feat, fIdx) => (
-                      <li key={fIdx} className="text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0 mt-1.5" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
                 {/* Action Links */}
-                <div className="pt-4 border-t border-slate-200 dark:border-white/[0.06] flex items-center justify-between gap-3">
+                <div className="pt-3 border-t border-slate-200 dark:border-white/[0.06] flex items-center justify-between gap-3">
                   <button
                     onClick={() => setActiveModalProject(project)}
                     className="text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 flex items-center gap-1.5 transition-colors"
@@ -498,10 +469,10 @@ export default function Projects() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
             <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              Engineering Lab &amp; Hardware Archive
+              Lab &amp; Experiments
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Published research prototypes, embedded firmware, and specialized technical tools.
+              Research prototypes, embedded firmware, and specialized tools.
             </p>
           </div>
 
@@ -522,93 +493,87 @@ export default function Projects() {
           </div>
         </div>
 
-        {/* 3-Column Lab Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* 2-Column Balanced Lab Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filteredLabProjects.map((project, idx) => (
             <motion.article
               key={project.id}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.35, delay: idx * 0.05 }}
-              className="flex flex-col justify-between rounded-2xl p-6 glass-card border border-slate-200/80 dark:border-white/[0.06] hover:border-cyan-500/40 transition-all duration-300 group"
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.35, delay: (idx % 2) * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col justify-between rounded-2xl p-6 glass-card border border-slate-200/80 dark:border-white/[0.06] hover:border-cyan-500/40 transition-all duration-300 group shadow-xs"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-md border border-cyan-500/20">
                     {project.category}
                   </span>
-                  <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                     {project.status}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2.5 mb-2.5">
                   {project.logo && (
-                    <div className="relative w-5 h-5 rounded-md overflow-hidden shrink-0 border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-slate-900 shadow-xs flex items-center justify-center p-0.5">
+                    <div className="relative w-6 h-6 rounded-lg overflow-hidden shrink-0 border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-slate-900 shadow-xs flex items-center justify-center p-0.5">
                       <Image
                         src={project.logo}
                         alt={`${project.title} logo`}
-                        width={20}
-                        height={20}
+                        width={24}
+                        height={24}
                         className="object-contain w-full h-full rounded-xs"
                       />
                     </div>
                   )}
-                  <h4 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
+                  <h4 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors leading-snug">
                     {project.title}
                   </h4>
                 </div>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">
-                  {project.tagline}
-                </p>
-
-                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-3 mb-4 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
                   {project.solution}
                 </p>
 
                 {/* Tech Pills */}
-                <div className="flex flex-wrap gap-1 mb-5">
-                  {project.tech.slice(0, 3).map((t) => (
+                <div className="flex flex-wrap gap-1.5 mb-5">
+                  {project.tech.slice(0, 4).map((t) => (
                     <span
                       key={t}
-                      className="px-2 py-0.5 text-[10px] font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                      className="px-2.5 py-0.5 text-[11px] font-medium rounded-md bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-white/[0.04]"
                     >
                       {t}
                     </span>
                   ))}
-                  {project.tech.length > 3 && (
+                  {project.tech.length > 4 && (
                     <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-md text-slate-400">
-                      +{project.tech.length - 3}
+                      +{project.tech.length - 4}
                     </span>
                   )}
                 </div>
               </div>
 
               {/* Card Footer */}
-              <div className="pt-3 border-t border-slate-200/70 dark:border-white/[0.06] flex items-center justify-between">
+              <div className="pt-3.5 border-t border-slate-200/70 dark:border-white/[0.06] flex items-center justify-between">
                 <button
                   onClick={() => setActiveModalProject(project)}
-                  className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 flex items-center gap-1 transition-colors"
+                  className="text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 flex items-center gap-1.5 transition-colors"
                 >
-                  <Eye size={12} />
-                  <span>Details</span>
+                  <Eye size={13} />
+                  <span>Deep Dive</span>
                 </button>
 
-                <div className="flex items-center gap-2">
-                  {project.liveUrl && (
-                    <a
-                      href={project.liveUrl}
-                      target={project.isInternalRoute ? "_self" : "_blank"}
-                      rel={project.isInternalRoute ? "" : "noopener noreferrer"}
-                      className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      title="Launch"
-                    >
-                      <ArrowUpRight size={15} />
-                    </a>
-                  )}
-                </div>
+                {project.liveUrl && (
+                  <a
+                    href={project.liveUrl}
+                    target={project.isInternalRoute ? "_self" : "_blank"}
+                    rel={project.isInternalRoute ? "" : "noopener noreferrer"}
+                    className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1 transition-colors"
+                  >
+                    <span>{project.isInternalRoute ? "Launch Lab" : "Live Demo"}</span>
+                    <ArrowUpRight size={13} />
+                  </a>
+                )}
               </div>
             </motion.article>
           ))}
@@ -679,10 +644,10 @@ export default function Projects() {
                 </div>
               </div>
 
-              {/* Verified Impact */}
+              {/* Key Result */}
               <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40">
                 <span className="text-xs font-bold uppercase text-emerald-800 dark:text-emerald-400 tracking-wider block mb-1">
-                  Verified Production Metric
+                  Key Result
                 </span>
                 <p className="text-sm font-semibold text-emerald-950 dark:text-emerald-300">
                   {activeModalProject.impactMetric}

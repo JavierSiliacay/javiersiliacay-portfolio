@@ -16,7 +16,17 @@ export default function Footer() {
         
         {/* Brand & Tagline */}
         <div className="text-center md:text-left space-y-1">
-          <a href="#" className="text-lg font-black tracking-tight text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+          <a 
+            href="#" 
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToTop();
+              if (window.location.hash) {
+                window.history.pushState(null, "", "/");
+              }
+            }}
+            className="text-lg font-black tracking-tight text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors cursor-pointer"
+          >
             JAVIER<span className="text-cyan-600 dark:text-cyan-400">.</span>
           </a>
           <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -28,8 +38,7 @@ export default function Footer() {
         <div className="flex flex-wrap justify-center gap-6 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
           <a href="#capabilities" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">Capabilities</a>
           <a href="#projects" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">Projects</a>
-          <a href="#experience" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">Experience</a>
-          <a href="#about" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">About</a>
+          <a href="#experience" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">About &amp; Experience</a>
           <Link href="/vision" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors flex items-center gap-1">
             <Eye size={11} className="text-cyan-600 dark:text-cyan-400" />
             <span>Vision Lab</span>

@@ -7,7 +7,6 @@ import {
   FolderGit2,
   Briefcase,
   Layers,
-  User,
   Eye,
   Search,
   Mail,
@@ -28,8 +27,7 @@ interface SidebarProps {
 const navItems = [
   { name: "Projects", href: "#projects", icon: FolderGit2 },
   { name: "Capabilities", href: "#capabilities", icon: Layers },
-  { name: "Experience", href: "#experience", icon: Briefcase },
-  { name: "About", href: "#about", icon: User },
+  { name: "About & Experience", href: "#experience", icon: Briefcase },
   { name: "Vision Lab", href: "/vision", icon: Eye, badge: "Lab" },
   { name: "Contact", href: "#contact", icon: Mail },
 ];
@@ -49,16 +47,38 @@ export default function Sidebar({ onOpenAsk }: SidebarProps) {
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-slate-200 dark:border-white/[0.08] bg-white/95 dark:bg-[#0c0c0f]/95 backdrop-blur-md px-6 py-7 lg:flex justify-between select-none">
         <div>
           {/* Brand Logo */}
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 font-mono font-bold text-sm tracking-tight text-slate-900 dark:text-white hover:opacity-75 transition-opacity"
+          <div
+            onClick={(e) => {
+              if (window.location.pathname === "/" || window.location.pathname === "") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                if (window.location.hash) {
+                  window.history.pushState(null, "", "/");
+                }
+              }
+            }}
+            className="cursor-pointer group block"
           >
-            <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-            <span>Javier Siliacay</span>
-          </Link>
-          <p className="font-mono text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-            Software Dev &bull; AI Engineer
-          </p>
+            <Link
+              href="/"
+              onClick={(e) => {
+                if (window.location.pathname === "/" || window.location.pathname === "") {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  if (window.location.hash) {
+                    window.history.pushState(null, "", "/");
+                  }
+                }
+              }}
+              className="text-lg font-black tracking-tight text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors inline-flex items-center gap-0.5 group/brand"
+            >
+              <span>JAVIER</span>
+              <span className="text-cyan-600 dark:text-cyan-400 group-hover/brand:scale-125 transition-transform inline-block">.</span>
+            </Link>
+            <p className="font-mono text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
+              Software Dev &bull; AI Engineer
+            </p>
+          </div>
 
           {/* Navigation Links */}
           <nav className="mt-8 flex flex-col gap-1.5 font-mono text-[13px]">
@@ -202,9 +222,21 @@ export default function Sidebar({ onOpenAsk }: SidebarProps) {
       {/* ─────────────── Mobile Top Bar (below lg) ─────────────── */}
       <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-white/[0.08] bg-white/90 dark:bg-[#0c0c0f]/90 backdrop-blur-md lg:hidden">
         <div className="flex items-center justify-between px-5 py-3">
-          <Link href="/" className="font-mono font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-            <span>Javier Siliacay</span>
+          <Link
+            href="/"
+            onClick={(e) => {
+              if (window.location.pathname === "/" || window.location.pathname === "") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                if (window.location.hash) {
+                  window.history.pushState(null, "", "/");
+                }
+              }
+            }}
+            className="text-lg font-black tracking-tight text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors inline-flex items-center gap-0.5 cursor-pointer group/brand"
+          >
+            <span>JAVIER</span>
+            <span className="text-cyan-600 dark:text-cyan-400 group-hover/brand:scale-125 transition-transform inline-block">.</span>
           </Link>
 
           <div className="flex items-center gap-2">

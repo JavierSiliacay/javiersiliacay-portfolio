@@ -9,8 +9,7 @@ import ThemeToggle from "./ThemeToggle";
 const navLinks = [
   { name: "Capabilities", href: "#capabilities" },
   { name: "Projects", href: "#projects" },
-  { name: "Experience", href: "#experience" },
-  { name: "About", href: "#about" },
+  { name: "About & Experience", href: "#experience" },
   { name: "Contact", href: "#contact" },
 ];
 
@@ -43,7 +42,17 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo & Status */}
         <div className="flex items-center gap-3">
-          <a href="#" className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors flex items-center gap-1 group">
+          <a 
+            href="#" 
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              if (window.location.hash) {
+                window.history.pushState(null, "", "/");
+              }
+            }}
+            className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors flex items-center gap-1 group cursor-pointer"
+          >
             <span>JAVIER</span>
             <span className="text-cyan-600 dark:text-cyan-400 group-hover:scale-125 transition-transform inline-block">.</span>
             <span className="text-xs font-mono font-normal text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/60 px-2 py-0.5 rounded-full ml-2 hidden sm:inline-block">

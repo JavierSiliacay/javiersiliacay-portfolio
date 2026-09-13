@@ -107,25 +107,25 @@ const capabilityPillars: CapabilityPillar[] = [
   },
   {
     id: "automotive",
-    title: "Automotive Diagnostics & Autotronics",
-    category: "Autotronics Engineering",
+    title: "Vehicle Tech & Workshop Systems",
+    category: "Software & Diagnostics",
     icon: Car,
-    description: "Applying formal Autotronics engineering principles to bridge modern vehicular electronic control units (ECU, CAN Bus, OBD-II) with cloud dashboards and AI diagnostics.",
+    description: "Developing specialized workshop management platforms, OBD-II diagnostic integrations, and sensor telemetry tools for automotive operations.",
     coreTech: [
-      "OBD-II Protocols (ELM327/STN1110)",
+      "OBD-II Protocols (ELM327)",
       "CAN Bus Architecture",
-      "Optical Spectrometry & Turbidity",
+      "Optical Turbidity Sensing",
       "Automotive Sensor Arrays",
-      "Preventive Diagnostics",
+      "Workshop ERP Workflows",
       "Android Diagnostic Apps"
     ],
     capabilities: [
-      "Live OBD-II parameter streaming and diagnostic trouble code (DTC) parsing",
-      "Optical oil degradation monitoring with real-time turbidity thresholds",
-      "Automotive workshop lifecycle management & job order workflows",
-      "Hardware-in-the-loop sensor bench calibration and PID testing"
+      "Workshop operations, job orders, inventory, and billing workflows",
+      "OBD-II diagnostic trouble code (DTC) parsing and live telemetry",
+      "Optical sensor telemetry for fluid degradation monitoring",
+      "Preventive maintenance scheduling and digital service records"
     ],
-    realWorldImpact: "Mentored 20+ student teams for National Robotics Competitions and engineered production automotive management software.",
+    realWorldImpact: "Architected the Autoworx workshop management platform and created Mekanik AI for guided automotive troubleshooting.",
     accentColor: "purple",
   }
 ];
@@ -146,29 +146,30 @@ export default function TechStack() {
   return (
     <div className="w-full">
       {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 text-xs font-semibold mb-3">
             <Layers size={13} />
-            <span>Technical Capabilities &amp; Arsenal</span>
+            <span>Tech Stack &amp; Skills</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-            Engineering <span className="text-gradient-cyan">Pillars</span>
+            Technical <span className="text-gradient-cyan">Capabilities</span>
           </h2>
         </div>
-        <p className="text-slate-600 dark:text-slate-400 text-sm max-w-md">
-          Spanning full-stack cloud software, machine learning vision models, embedded microcontrollers, and autotronics diagnostics.
-        </p>
       </div>
 
       {/* Interactive Pillar Selector Tabs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-        {capabilityPillars.map((pillar) => {
+        {capabilityPillars.map((pillar, idx) => {
           const TabIcon = pillar.icon;
           const isActive = activeTab === pillar.id;
           return (
-            <button
+            <motion.button
               key={pillar.id}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.35, delay: idx * 0.06, ease: [0.16, 1, 0.3, 1] }}
               onClick={() => setActiveTab(pillar.id)}
               className={`p-4 rounded-2xl text-left transition-all duration-300 flex flex-col justify-between relative overflow-hidden border ${
                 isActive 
@@ -192,7 +193,7 @@ export default function TechStack() {
                   {pillar.title}
                 </h3>
               </div>
-            </button>
+            </motion.button>
           );
         })}
       </div>
@@ -216,7 +217,7 @@ export default function TechStack() {
                   <Icon size={24} />
                 </div>
                 <div>
-                  <span className="text-xs uppercase font-bold tracking-wider text-cyan-600 dark:text-cyan-400">Capability Domain</span>
+                  <span className="text-xs uppercase font-bold tracking-wider text-cyan-600 dark:text-cyan-400">Focus Area</span>
                   <h3 className="text-2xl font-black text-slate-900 dark:text-white">{selectedPillar.title}</h3>
                 </div>
               </div>
@@ -226,7 +227,7 @@ export default function TechStack() {
               </p>
 
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Key Technical Competencies</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Key Competencies</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {selectedPillar.capabilities.map((cap, i) => (
                     <div key={i} className="flex items-start gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80">
@@ -237,9 +238,9 @@ export default function TechStack() {
                 </div>
               </div>
 
-              {/* Real World Impact Badge */}
+              {/* Practical Application Badge */}
               <div className="p-4 rounded-2xl bg-cyan-500/[0.06] border border-cyan-500/20 flex items-start gap-3">
-                <span className="text-cyan-700 dark:text-cyan-400 font-bold text-xs shrink-0 mt-0.5 uppercase tracking-wide">Applied Impact:</span>
+                <span className="text-cyan-700 dark:text-cyan-400 font-bold text-xs shrink-0 mt-0.5 uppercase tracking-wide">Practical Application:</span>
                 <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                   {selectedPillar.realWorldImpact}
                 </p>
@@ -251,7 +252,7 @@ export default function TechStack() {
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-4 flex items-center gap-2">
                   <Terminal size={14} className="text-amber-600 dark:text-amber-400" />
-                  <span>Stack &amp; Framework Arsenal</span>
+                  <span>Technologies &amp; Tools</span>
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedPillar.coreTech.map((tech) => (
@@ -271,7 +272,7 @@ export default function TechStack() {
                   href="#projects" 
                   className="inline-flex items-center gap-2 text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors group"
                 >
-                  <span>Explore verified projects in this domain</span>
+                  <span>View related projects</span>
                   <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </a>
               </div>
@@ -286,12 +287,19 @@ export default function TechStack() {
         <div className="flex items-center gap-2 mb-4">
           <Cpu size={16} className="text-cyan-600 dark:text-cyan-400" />
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            Hardware &amp; Microcontroller Platforms in Active Development
+            Hardware &amp; Prototyping Platforms
           </h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {hardwareBench.map((item) => (
-            <div key={item.name} className="p-3.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-xs">
+          {hardwareBench.map((item, idx) => (
+            <motion.div
+              key={item.name}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-30px" }}
+              transition={{ duration: 0.3, delay: idx * 0.05, ease: [0.16, 1, 0.3, 1] }}
+              className="p-3.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-xs"
+            >
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
@@ -304,7 +312,7 @@ export default function TechStack() {
               <span className="mt-3 text-[10px] font-bold text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 w-fit">
                 {item.badge}
               </span>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

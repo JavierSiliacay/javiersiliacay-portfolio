@@ -20,7 +20,7 @@ export default function Contact() {
   const [formState, setFormState] = useState({
     name: "",
     email: "",
-    projectType: "Full-Stack Web App",
+    projectType: "Custom Website or Web Application",
     message: ""
   });
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -37,12 +37,13 @@ export default function Contact() {
     e.preventDefault();
     if (!formState.name || !formState.email || !formState.message) return;
 
-    // Construct mailto link
+    // Construct direct Gmail compose link with pre-filled fields
     const subject = encodeURIComponent(`[Project Inquiry: ${formState.projectType}] from ${formState.name}`);
     const body = encodeURIComponent(
       `Hello Javier,\n\nName: ${formState.name}\nEmail: ${formState.email}\nProject Type: ${formState.projectType}\n\nProject Scope & Details:\n${formState.message}\n\nSent from Portfolio Contact Form`
     );
-    window.open(`mailto:${emailAddress}?subject=${subject}&body=${body}`, "_blank");
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emailAddress)}&su=${subject}&body=${body}`;
+    window.open(gmailUrl, "_blank", "noopener,noreferrer");
     setFormSubmitted(true);
   };
 
@@ -117,33 +118,33 @@ export default function Contact() {
 
             {/* Social Channels */}
             <div className="pt-4 border-t border-slate-200 dark:border-slate-800/80">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Verified Profiles</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Connect With Me</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <a
                   href="https://www.linkedin.com/in/javier-siliacay-37910b3bb"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/40 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                  className="group p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-[#0A66C2]/10 dark:hover:bg-[#0A66C2]/20 border border-slate-200 dark:border-slate-800 hover:border-[#0A66C2]/50 dark:hover:border-[#0A66C2]/60 text-slate-700 dark:text-slate-300 hover:text-[#0A66C2] dark:hover:text-[#38bdf8] text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 shadow-xs hover:-translate-y-0.5"
                 >
-                  <Linkedin size={14} />
+                  <Linkedin size={14} className="transition-transform duration-200 group-hover:scale-110" />
                   <span>LinkedIn</span>
                 </a>
                 <a
                   href="https://www.facebook.com/siliacayjavier/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/40 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                  className="group p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-[#1877F2]/10 dark:hover:bg-[#1877F2]/20 border border-slate-200 dark:border-slate-800 hover:border-[#1877F2]/50 dark:hover:border-[#1877F2]/60 text-slate-700 dark:text-slate-300 hover:text-[#1877F2] dark:hover:text-[#60a5fa] text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 shadow-xs hover:-translate-y-0.5"
                 >
-                  <Facebook size={14} />
+                  <Facebook size={14} className="transition-transform duration-200 group-hover:scale-110" />
                   <span>Facebook</span>
                 </a>
                 <a
                   href="https://www.instagram.com/itsyaboi_vier"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/40 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                  className="group p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-[#E1306C]/10 dark:hover:bg-[#E1306C]/20 border border-slate-200 dark:border-slate-800 hover:border-[#E1306C]/50 dark:hover:border-[#E1306C]/60 text-slate-700 dark:text-slate-300 hover:text-[#E1306C] dark:hover:text-[#f472b6] text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 shadow-xs hover:-translate-y-0.5"
                 >
-                  <Instagram size={14} />
+                  <Instagram size={14} className="transition-transform duration-200 group-hover:scale-110" />
                   <span>Instagram</span>
                 </a>
               </div>
@@ -201,11 +202,12 @@ export default function Contact() {
                   onChange={(e) => setFormState({ ...formState, projectType: e.target.value })}
                   className="w-full bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 focus:border-cyan-500/60 rounded-xl px-4 py-3 text-xs text-slate-900 dark:text-slate-100 focus:outline-none transition-colors shadow-xs"
                 >
-                  <option value="Full-Stack Web App">Full-Stack Web Platform (Next.js / Supabase / Cloud)</option>
-                  <option value="AI & Computer Vision">AI / Computer Vision Solution (TensorFlow / MediaPipe)</option>
-                  <option value="IoT & Hardware Telemetry">Embedded Systems / IoT Diagnostics (ESP32 / Serial)</option>
-                  <option value="Automotive Software ERP">Automotive ERP / Diagnostics Software</option>
-                  <option value="Engineering Consultation">Consultation or Full-Time Opportunity</option>
+                  <option value="Custom Website or Web Application">Custom Website or Web Application</option>
+                  <option value="Business Software & Internal Systems">Business Software &amp; Internal Systems</option>
+                  <option value="AI, Smart Automation & Computer Vision">AI, Smart Automation &amp; Computer Vision</option>
+                  <option value="Connected Devices & Hardware / IoT">Connected Devices &amp; Hardware / IoT</option>
+                  <option value="Full-Time Role or Long-Term Contract">Full-Time Role or Long-Term Contract</option>
+                  <option value="Consultation / Not sure yet (Let's discuss)">Consultation / Not sure yet (Let&apos;s discuss)</option>
                 </select>
               </div>
 
@@ -226,7 +228,7 @@ export default function Contact() {
               <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Mail size={12} className="text-cyan-600 dark:text-cyan-400" />
-                  <span>Opens direct pre-filled email client</span>
+                  <span>Opens directly in Gmail with pre-filled details</span>
                 </p>
 
                 <button
@@ -240,7 +242,7 @@ export default function Contact() {
 
               {formSubmitted && (
                 <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold text-center">
-                  Email client opened! You can also copy my email directly if you prefer.
+                  Gmail compose opened! You can also copy my email directly if you prefer.
                 </div>
               )}
             </form>
