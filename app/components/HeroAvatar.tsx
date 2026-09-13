@@ -46,7 +46,7 @@ export default function HeroAvatar() {
         setIsTransforming(true);
         setVideoCompleted(false);
         video.currentTime = 0;
-        
+
         // Attempt play with audio, fallback to muted if browser restricts
         const playPromise = video.play();
         if (playPromise !== undefined) {
@@ -115,9 +115,8 @@ export default function HeroAvatar() {
             alt="Javier Siliacay — Software Developer & AI Engineer (Daylight Studio)"
             fill
             sizes="(max-width: 640px) 288px, 320px"
-            className={`object-cover object-top transition-opacity duration-500 ease-in-out ${
-              isDark ? "opacity-0 pointer-events-none" : "opacity-100"
-            }`}
+            className={`object-cover object-top transition-opacity duration-500 ease-in-out ${isDark ? "opacity-0 pointer-events-none" : "opacity-100"
+              }`}
             priority
           />
 
@@ -127,9 +126,8 @@ export default function HeroAvatar() {
             alt="Javier Siliacay — Software Developer & AI Engineer (Cyber Dark)"
             fill
             sizes="(max-width: 640px) 288px, 320px"
-            className={`object-cover object-top transition-opacity duration-500 ease-in-out ${
-              isDark ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
+            className={`object-cover object-top transition-opacity duration-500 ease-in-out ${isDark ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
             priority
           />
 
@@ -143,9 +141,8 @@ export default function HeroAvatar() {
             preload="auto"
             onEnded={handleVideoEnded}
             onError={handleVideoEnded}
-            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out ${
-              isDark && (isTransforming || videoCompleted) ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
+            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out ${isDark && (isTransforming || videoCompleted) ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
           />
 
           {/* Subtle bottom vignette gradient */}

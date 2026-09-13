@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { ChevronRight, FileText, ArrowUpRight, Award, Shield, Cpu, Mail } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
 import HeroAvatar from "../HeroAvatar";
 
@@ -23,7 +24,124 @@ const credibilityHighlights = [
   },
 ];
 
+const GLYPHS = "0101XYZ_#<>/*+~&!";
+
+function useScrambleText(targetText: string, delayMs = 0) {
+  const [text, setText] = useState(targetText);
+  const [triggerCount, setTriggerCount] = useState(0);
+
+  const trigger = useCallback(() => {
+    setTriggerCount((c) => c + 1);
+  }, []);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    let iteration = 0;
+    let interval: NodeJS.Timeout;
+
+    timer = setTimeout(() => {
+      interval = setInterval(() => {
+        setText(
+          targetText
+            .split("")
+            .map((letter, idx) => {
+              if (letter === " ") return " ";
+              if (idx < iteration) return targetText[idx];
+              return GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+            })
+            .join("")
+        );
+
+        if (iteration >= targetText.length) {
+          clearInterval(interval);
+        }
+        iteration += 1 / 2;
+      }, 26);
+    }, delayMs);
+
+    return () => {
+      clearTimeout(timer);
+      if (interval) clearInterval(interval);
+    };
+  }, [targetText, delayMs, triggerCount]);
+
+  return { text, trigger };
+}
+
+const roleContainerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.35,
+    },
+  },
+};
+
+const roleItemVariants: Variants = {
+  hidden: { opacity: 0, y: 12, scale: 0.94 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 320,
+      damping: 24,
+    },
+  },
+};
+
+const paragraphVariants: Variants = {
+  hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.7,
+      delay: 0.5,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
+
+const ctaVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.65,
+      delay: 0.65,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
+
+const proofVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.65,
+      delay: 0.75,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
+
 export default function Hero() {
+  const firstName = useScrambleText("Javier", 80);
+  const lastName = useScrambleText("Siliacay", 220);
+
+  const handleNameReplay = () => {
+    firstName.trigger();
+    lastName.trigger();
+  };
+
   return (
     <section className="relative min-h-[88vh] flex items-center justify-center pt-28 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden bg-dot-grid">
       {/* Ambient Lighting Accents */}
@@ -32,44 +150,76 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
         {/* Left Content Column */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          className="lg:col-span-7 text-left"
-        >
-          {/* Status Badge */}
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 border border-cyan-500/30 text-slate-800 dark:text-slate-200 text-xs font-semibold mb-6 shadow-sm backdrop-blur-md">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="text-cyan-700 dark:text-cyan-400 font-mono text-[11px]">
-              Available for contracts &amp; new roles
-            </span>
-          </div>
+        <div className="lg:col-span-7 text-left">
+          {/* Main Title with Tech Scramble Decrypt & Interactive Hover Trigger */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-2"
+          >
+            <h1
+              onClick={handleNameReplay}
+              onMouseEnter={handleNameReplay}
+              title="Click or hover to replay tech decrypt"
+              className="text-4xl sm:text-6xl xl:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.08] cursor-pointer inline-block select-none group"
+            >
+              <span>{firstName.text}</span>{" "}
+              <span className="text-gradient-cyan drop-shadow-sm group-hover:brightness-110 transition-all">
+                {lastName.text}
+              </span>
+            </h1>
+          </motion.div>
 
-          {/* Main Title */}
-          <h1 className="text-4xl sm:text-6xl xl:text-7xl font-black tracking-tight text-slate-900 dark:text-white mb-4 leading-[1.08]">
-            Javier <span className="text-gradient-cyan">Siliacay</span>
-          </h1>
+          {/* Eye-catching Animated Neon Laser Beam Underline */}
+          <motion.div
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="origin-left h-[3.5px] w-40 sm:w-60 rounded-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-transparent shadow-[0_0_14px_rgba(6,182,212,0.7)] mb-5"
+          />
 
-          {/* Professional Role Headline */}
-          <div className="flex flex-wrap items-center gap-2 text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-200 mb-6">
-            <span className="text-cyan-600 dark:text-cyan-400">Software Developer</span>
-            <span className="text-slate-300 dark:text-slate-700">&bull;</span>
-            <span className="text-slate-900 dark:text-white">AI Engineer</span>
-            <span className="text-slate-300 dark:text-slate-700">&bull;</span>
-            <span className="text-cyan-600 dark:text-cyan-400">IoT Enthusiast</span>
-          </div>
+          {/* Professional Role Headline with Spring Stagger */}
+          <motion.div
+            variants={roleContainerVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-wrap items-center gap-2 text-lg sm:text-2xl font-bold mb-6"
+          >
+            <motion.span variants={roleItemVariants} className="text-cyan-600 dark:text-cyan-400">
+              Software Developer
+            </motion.span>
+            <motion.span variants={roleItemVariants} className="text-slate-300 dark:text-slate-700">
+              &bull;
+            </motion.span>
+            <motion.span variants={roleItemVariants} className="text-slate-900 dark:text-white">
+              AI Engineer
+            </motion.span>
+            <motion.span variants={roleItemVariants} className="text-slate-300 dark:text-slate-700">
+              &bull;
+            </motion.span>
+            <motion.span variants={roleItemVariants} className="text-cyan-600 dark:text-cyan-400">
+              IoT Enthusiast
+            </motion.span>
+          </motion.div>
 
-          {/* Value Proposition */}
-          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-2xl leading-relaxed">
+          {/* Value Proposition with Soft Focus Reveal */}
+          <motion.p
+            variants={paragraphVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-2xl leading-relaxed"
+          >
             Hey, I&apos;m <strong className="text-slate-900 dark:text-white font-bold">Javier</strong>! I&apos;m a software developer and AI engineer building production-grade web platforms and intelligent applications. I currently lead engineering for Autoworx and its partner companies, develop real-time computer vision tools, and occasionally tinker with IoT hardware on the side.
-          </p>
+          </motion.p>
 
-          {/* Streamlined Action CTAs (2 clear high-conversion buttons) */}
-          <div className="flex flex-wrap gap-3.5 mb-10 items-center">
+          {/* Streamlined Action CTAs */}
+          <motion.div
+            variants={ctaVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-wrap gap-3.5 mb-10 items-center"
+          >
             <a
               href="#projects"
               className="px-7 py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-cyan-600/20 hover:scale-[1.02] flex items-center gap-2 text-sm"
@@ -82,7 +232,7 @@ export default function Hero() {
               href="/resume"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 hover:border-cyan-500/50 rounded-xl font-semibold transition-all hover:scale-[1.02] shadow-sm flex items-center gap-2 text-sm"
+              className="px-6 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 hover:border-cyan-500/50 rounded-xl font-semibold transition-all hover:scale-[1.02] shadow-xs flex items-center gap-2 text-sm"
             >
               <FileText size={16} />
               <span>Resume</span>
@@ -96,10 +246,15 @@ export default function Hero() {
               <Mail size={16} />
               <span>Contact</span>
             </a>
-          </div>
+          </motion.div>
 
           {/* Quiet Social-Proof Ribbon */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-slate-200/80 dark:border-white/[0.08]">
+          <motion.div
+            variants={proofVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-slate-200/80 dark:border-white/[0.08]"
+          >
             {credibilityHighlights.map((stat, idx) => {
               const Icon = stat.icon;
               return (
@@ -121,10 +276,10 @@ export default function Hero() {
                 </div>
               );
             })}
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
-        {/* Right Portrait Column with Interactive Moving Sunglasses */}
+        {/* Right Portrait Column */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
