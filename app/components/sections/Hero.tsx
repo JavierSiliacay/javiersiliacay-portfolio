@@ -97,15 +97,73 @@ const roleItemVariants: Variants = {
   },
 };
 
-const paragraphVariants: Variants = {
-  hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+const BIO_WORDS = [
+  { text: "Hey,", isAccent: false },
+  { text: "I'm", isAccent: false },
+  { text: "Javier!", isAccent: true, accentClass: "text-slate-900 dark:text-white font-bold" },
+  { text: "I'm", isAccent: false },
+  { text: "a", isAccent: false },
+  { text: "software", isAccent: false },
+  { text: "developer", isAccent: false },
+  { text: "and", isAccent: false },
+  { text: "AI", isAccent: false },
+  { text: "engineer", isAccent: false },
+  { text: "building", isAccent: false },
+  { text: "production-grade", isAccent: false },
+  { text: "web", isAccent: false },
+  { text: "platforms", isAccent: false },
+  { text: "and", isAccent: false },
+  { text: "intelligent", isAccent: false },
+  { text: "applications.", isAccent: false },
+  { text: "I", isAccent: false },
+  { text: "currently", isAccent: false },
+  { text: "lead", isAccent: false },
+  { text: "engineering", isAccent: false },
+  { text: "for", isAccent: false },
+  { text: "Autoworx", isAccent: true, accentClass: "text-cyan-600 dark:text-cyan-400 font-semibold" },
+  { text: "and", isAccent: false },
+  { text: "its", isAccent: false },
+  { text: "partner", isAccent: false },
+  { text: "companies,", isAccent: false },
+  { text: "develop", isAccent: false },
+  { text: "real-time", isAccent: false },
+  { text: "computer", isAccent: true, accentClass: "text-slate-900 dark:text-white font-semibold" },
+  { text: "vision", isAccent: true, accentClass: "text-slate-900 dark:text-white font-semibold" },
+  { text: "tools,", isAccent: false },
+  { text: "and", isAccent: false },
+  { text: "occasionally", isAccent: false },
+  { text: "tinker", isAccent: false },
+  { text: "with", isAccent: false },
+  { text: "IoT", isAccent: true, accentClass: "text-cyan-600 dark:text-cyan-400 font-semibold" },
+  { text: "hardware", isAccent: true, accentClass: "text-cyan-600 dark:text-cyan-400 font-semibold" },
+  { text: "on", isAccent: false },
+  { text: "the", isAccent: false },
+  { text: "side.", isAccent: false },
+];
+
+const streamContainerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.024,
+      delayChildren: 0.75,
+    },
+  },
+};
+
+const wordVariants: Variants = {
+  hidden: {
+    opacity: 0.12,
+    y: 3,
+    filter: "blur(4px)",
+  },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
     transition: {
-      duration: 0.7,
-      delay: 0.8,
+      duration: 0.35,
       ease: [0.16, 1, 0.3, 1],
     },
   },
@@ -118,7 +176,7 @@ const ctaVariants: Variants = {
     y: 0,
     transition: {
       duration: 0.65,
-      delay: 0.95,
+      delay: 1.45,
       ease: [0.16, 1, 0.3, 1],
     },
   },
@@ -131,7 +189,7 @@ const proofVariants: Variants = {
     y: 0,
     transition: {
       duration: 0.65,
-      delay: 1.05,
+      delay: 1.55,
       ease: [0.16, 1, 0.3, 1],
     },
   },
@@ -209,14 +267,22 @@ export default function Hero() {
             </motion.span>
           </motion.div>
 
-          {/* Value Proposition with Soft Focus Reveal */}
+          {/* Value Proposition with Apple-Style Word-by-Word Radiant Stream */}
           <motion.p
-            variants={paragraphVariants}
+            variants={streamContainerVariants}
             initial="hidden"
             animate="visible"
-            className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-2xl leading-relaxed"
+            className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-2xl leading-relaxed flex flex-wrap gap-x-1.5 gap-y-1 select-none"
           >
-            Hey, I&apos;m <strong className="text-slate-900 dark:text-white font-bold">Javier</strong>! I&apos;m a software developer and AI engineer building production-grade web platforms and intelligent applications. I currently lead engineering for Autoworx and its partner companies, develop real-time computer vision tools, and occasionally tinker with IoT hardware on the side.
+            {BIO_WORDS.map((item, idx) => (
+              <motion.span
+                key={idx}
+                variants={wordVariants}
+                className={item.isAccent ? item.accentClass : undefined}
+              >
+                {item.text}
+              </motion.span>
+            ))}
           </motion.p>
 
           {/* Streamlined Action CTAs */}
