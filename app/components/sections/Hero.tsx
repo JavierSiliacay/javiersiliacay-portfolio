@@ -179,6 +179,25 @@ const statsVariants: Variants = {
 
 
 export default function Hero() {
+  // Dynamic live GitHub telemetry state
+  const [githubStats, setGithubStats] = useState({
+    total: 1178,
+    currentStreak: 12,
+    longestStreak: 16,
+    live: false,
+  });
+
+  useEffect(() => {
+    fetch("/api/github-stats/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && typeof data.total === "number") {
+          setGithubStats(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Configurable decrypt durations (in milliseconds)
   // Format: useScrambleText(text, delayMs, durationMs)
   const firstName = useScrambleText("Javier", 150, 1100);
@@ -310,24 +329,20 @@ export default function Hero() {
             animate="visible"
             className="pt-6 border-t border-slate-200/80 dark:border-white/[0.08]"
           >
-            <a
-              href="https://github.com/JavierSiliacay"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block p-3.5 sm:p-4 rounded-2xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-white/[0.06] hover:border-cyan-500/40 transition-all shadow-2xs"
-              title="View Javier's GitHub Profile"
+            <div
+              className="p-3.5 sm:p-4 rounded-2xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-white/[0.06] shadow-2xs cursor-default select-none"
             >
               <div className="flex items-center gap-2 mb-3">
-                <Github size={14} className="text-slate-700 dark:text-slate-300 group-hover:text-cyan-500 transition-colors" />
+                <Github size={14} className="text-slate-700 dark:text-slate-300" />
                 <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  GitHub Telemetry
+                  GitHub Stats
                 </span>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <div className="font-mono text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                    1,176<span className="text-cyan-500 text-lg">+</span>
+                    {githubStats.total.toLocaleString()}<span className="text-cyan-500 text-lg">+</span>
                   </div>
                   <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-0.5">
                     Contributions
@@ -339,7 +354,7 @@ export default function Hero() {
 
                 <div>
                   <div className="font-mono text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
-                    <span>12</span>
+                    <span>{githubStats.currentStreak}</span>
                     <Flame size={18} className="text-amber-500 animate-pulse shrink-0" />
                   </div>
                   <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-0.5">
@@ -352,7 +367,7 @@ export default function Hero() {
 
                 <div>
                   <div className="font-mono text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                    16
+                    {githubStats.longestStreak}
                   </div>
                   <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-0.5">
                     Best Streak
@@ -362,7 +377,7 @@ export default function Hero() {
                   </div>
                 </div>
               </div>
-            </a>
+            </div>
           </motion.div>
         </div>
 
