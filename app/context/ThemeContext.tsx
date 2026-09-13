@@ -26,8 +26,8 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
-  const [themeMode, setThemeModeState] = useState<ThemeMode>("system");
+  const [theme, setThemeState] = useState<Theme>("light");
+  const [themeMode, setThemeModeState] = useState<ThemeMode>("light");
   const [triggerInfo, setTriggerInfo] = useState<ThemeTriggerInfo | null>(null);
 
   // Apply theme class to HTML element
@@ -50,29 +50,37 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (typeof window !== "undefined") {
         return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
       }
-      return "dark";
+      return "light";
     }
     return mode;
   }, []);
 
-  // Initialize theme: ALWAYS default to system preference on load and refresh
+  // Initialize theme: default to "light" unless user explicitly saved another preference
   useEffect(() => {
+    let modeToUse: ThemeMode = "light";
     try {
-      localStorage.removeItem("theme-preference");
+      const saved = localStorage.getItem("theme-preference") as ThemeMode | null;
+      if (saved && (saved === "light" || saved === "dark" || saved === "system")) {
+        modeToUse = saved;
+      }
     } catch (e) {}
 
-    const modeToUse: ThemeMode = "system";
     const resolved = resolveTheme(modeToUse);
-    setThemeModeState("system");
+    setThemeModeState(modeToUse);
     setThemeState(resolved);
     applyThemeToDOM(resolved);
 
-    // Media query listener for system mode
+    // Media query listener only if system mode is explicitly chosen
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleSystemChange = (e: MediaQueryListEvent) => {
-      const newResolved: Theme = e.matches ? "dark" : "light";
-      setThemeState(newResolved);
-      applyThemeToDOM(newResolved);
+      try {
+        const currentSaved = localStorage.getItem("theme-preference");
+        if (currentSaved === "system") {
+          const newResolved: Theme = e.matches ? "dark" : "light";
+          setThemeState(newResolved);
+          applyThemeToDOM(newResolved);
+        }
+      } catch (err) {}
     };
 
     mediaQuery.addEventListener("change", handleSystemChange);
@@ -109,6 +117,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     });
 
     const commitThemeState = () => {
+      try {
+        localStorage.setItem("theme-preference", newMode);
+      } catch (err) {}
       setThemeModeState(newMode);
       setThemeState(newResolved);
       applyThemeToDOM(newResolved);

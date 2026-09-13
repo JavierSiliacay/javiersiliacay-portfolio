@@ -47,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#030712",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -65,9 +65,16 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  localStorage.removeItem('theme-preference');
-                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  var theme = prefersDark ? 'dark' : 'light';
+                  var saved = localStorage.getItem('theme-preference');
+                  var theme = 'light';
+                  if (saved === 'dark') {
+                    theme = 'dark';
+                  } else if (saved === 'system') {
+                    theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  } else {
+                    theme = 'light';
+                  }
+
                   if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
                     document.documentElement.classList.remove('light');

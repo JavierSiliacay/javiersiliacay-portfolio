@@ -19,7 +19,7 @@ export default function HeroAvatar() {
     setMounted(true);
   }, []);
 
-  const isDark = mounted ? theme === "dark" : true;
+  const isDark = mounted ? theme === "dark" : false;
 
   // Handler when video completes its playthrough
   const handleVideoEnded = useCallback(() => {
