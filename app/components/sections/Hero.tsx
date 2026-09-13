@@ -26,7 +26,7 @@ const credibilityHighlights = [
 
 const GLYPHS = "0101XYZ_#<>/*+~&!";
 
-function useScrambleText(targetText: string, delayMs = 0) {
+function useScrambleText(targetText: string, delayMs = 0, durationMs = 1200) {
   const [text, setText] = useState(targetText);
   const [triggerCount, setTriggerCount] = useState(0);
 
@@ -38,6 +38,10 @@ function useScrambleText(targetText: string, delayMs = 0) {
     let timer: NodeJS.Timeout;
     let iteration = 0;
     let interval: NodeJS.Timeout;
+
+    const intervalMs = 30;
+    const totalTicks = Math.max(1, durationMs / intervalMs);
+    const step = targetText.length / totalTicks;
 
     timer = setTimeout(() => {
       interval = setInterval(() => {
@@ -55,15 +59,15 @@ function useScrambleText(targetText: string, delayMs = 0) {
         if (iteration >= targetText.length) {
           clearInterval(interval);
         }
-        iteration += 1 / 2;
-      }, 26);
+        iteration += step;
+      }, intervalMs);
     }, delayMs);
 
     return () => {
       clearTimeout(timer);
       if (interval) clearInterval(interval);
     };
-  }, [targetText, delayMs, triggerCount]);
+  }, [targetText, delayMs, durationMs, triggerCount]);
 
   return { text, trigger };
 }
@@ -74,7 +78,7 @@ const roleContainerVariants: Variants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.1,
-      delayChildren: 0.35,
+      delayChildren: 0.6,
     },
   },
 };
@@ -101,7 +105,7 @@ const paragraphVariants: Variants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.7,
-      delay: 0.5,
+      delay: 0.8,
       ease: [0.16, 1, 0.3, 1],
     },
   },
@@ -114,7 +118,7 @@ const ctaVariants: Variants = {
     y: 0,
     transition: {
       duration: 0.65,
-      delay: 0.65,
+      delay: 0.95,
       ease: [0.16, 1, 0.3, 1],
     },
   },
@@ -127,15 +131,17 @@ const proofVariants: Variants = {
     y: 0,
     transition: {
       duration: 0.65,
-      delay: 0.75,
+      delay: 1.05,
       ease: [0.16, 1, 0.3, 1],
     },
   },
 };
 
 export default function Hero() {
-  const firstName = useScrambleText("Javier", 80);
-  const lastName = useScrambleText("Siliacay", 220);
+  // Configurable decrypt durations (in milliseconds)
+  // Format: useScrambleText(text, delayMs, durationMs)
+  const firstName = useScrambleText("Javier", 150, 1100);
+  const lastName = useScrambleText("Siliacay", 400, 1400);
 
   const handleNameReplay = () => {
     firstName.trigger();
@@ -175,7 +181,7 @@ export default function Hero() {
           <motion.div
             initial={{ scaleX: 0, opacity: 0 }}
             animate={{ scaleX: 1, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.85, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="origin-left h-[3.5px] w-40 sm:w-60 rounded-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-transparent shadow-[0_0_14px_rgba(6,182,212,0.7)] mb-5"
           />
 
