@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ChevronRight, FileText, ArrowUpRight, Mail } from "lucide-react";
+import { ChevronRight, FileText, ArrowUpRight, Mail, Github, Flame } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
 import HeroAvatar from "../HeroAvatar";
@@ -164,6 +164,19 @@ const ctaVariants: Variants = {
   },
 };
 
+const statsVariants: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.65,
+      delay: 1.6,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
+
 
 export default function Hero() {
   // Configurable decrypt durations (in milliseconds)
@@ -287,6 +300,68 @@ export default function Hero() {
             >
               <Mail size={16} />
               <span>Contact</span>
+            </a>
+          </motion.div>
+
+          {/* Minimalist Geist Mono GitHub Telemetry Strip */}
+          <motion.div
+            variants={statsVariants}
+            initial="hidden"
+            animate="visible"
+            className="pt-6 border-t border-slate-200/80 dark:border-white/[0.08]"
+          >
+            <a
+              href="https://github.com/JavierSiliacay"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block p-3.5 sm:p-4 rounded-2xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-white/[0.06] hover:border-cyan-500/40 transition-all shadow-2xs"
+              title="View Javier's GitHub Profile"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Github size={14} className="text-slate-700 dark:text-slate-300 group-hover:text-cyan-500 transition-colors" />
+                <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  GitHub Telemetry
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <div className="font-mono text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                    1,176<span className="text-cyan-500 text-lg">+</span>
+                  </div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-0.5">
+                    Contributions
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-400 dark:text-slate-500 hidden sm:block">
+                    Aug 2024 &ndash; Present
+                  </div>
+                </div>
+
+                <div>
+                  <div className="font-mono text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
+                    <span>12</span>
+                    <Flame size={18} className="text-amber-500 animate-pulse shrink-0" />
+                  </div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-0.5">
+                    Active Streak
+                  </div>
+                  <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 hidden sm:block">
+                    Continuous Code
+                  </div>
+                </div>
+
+                <div>
+                  <div className="font-mono text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                    16
+                  </div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-0.5">
+                    Best Streak
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-400 dark:text-slate-500 hidden sm:block">
+                    Peak Velocity
+                  </div>
+                </div>
+              </div>
             </a>
           </motion.div>
         </div>
