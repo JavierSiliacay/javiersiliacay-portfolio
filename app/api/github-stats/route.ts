@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const revalidate = 3600; // Cache for 1 hour
+export const dynamic = "force-dynamic";
 
 interface ContributionDay {
   date: string;
@@ -17,7 +17,7 @@ export async function GET() {
     const res = await fetch(
       "https://github-contributions-api.jogruber.de/v4/JavierSiliacay",
       {
-        next: { revalidate: 3600 },
+        cache: "no-store",
         headers: {
           "User-Agent": "JavierSiliacay-Portfolio",
         },
@@ -36,9 +36,12 @@ export async function GET() {
       0
     );
 
-    const days = data.contributions || [];
+    // 2. Sort contributions chronologically (ascending by date: YYYY-MM-DD)
+    const days = [...(data.contributions || [])].sort((a, b) =>
+      a.date.localeCompare(b.date)
+    );
 
-    // 2. Calculate longest streak
+    // 3. Calculate longest streak
     let longestStreak = 0;
     let tempStreak = 0;
 
@@ -53,37 +56,50 @@ export async function GET() {
       }
     }
 
-    // 3. Calculate current streak (look backwards from today or yesterday)
+    // 4. Calculate current streak (looking backwards from today/yesterday)
     const todayStr = new Date().toISOString().split("T")[0];
-    const todayIndex = days.findIndex((d) => d.date === todayStr);
-    const startIndex = todayIndex !== -1 ? todayIndex : days.length - 1;
+    let checkIndex = days.findIndex((d) => d.date === todayStr);
 
-    let currentStreak = 0;
-    let checkIndex = startIndex;
+    if (checkIndex === -1) {
+      checkIndex = days.length - 1;
+    }
 
-    // If today has 0 commits so far, check if yesterday had commits (streak is still intact for the day)
+    // If today has 0 commits so far, check if yesterday had commits (streak is still active)
     if (days[checkIndex] && days[checkIndex].count === 0 && checkIndex > 0) {
       checkIndex = checkIndex - 1;
     }
 
+    let currentStreak = 0;
     while (checkIndex >= 0 && days[checkIndex].count > 0) {
       currentStreak++;
       checkIndex--;
     }
 
-    return NextResponse.json({
-      total: Math.max(totalContributions, 1176),
-      currentStreak: Math.max(currentStreak, 12),
-      longestStreak: Math.max(longestStreak, 16),
-      live: true,
-    });
+    if (totalContributions === 0) {
+      throw new Error("Empty contribution data");
+    }
+
+    return NextResponse.json(
+      {
+        total: totalContributions,
+        currentStreak,
+        longestStreak,
+        live: true,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        },
+      }
+    );
   } catch {
     // Graceful fallback if network or rate limit restricts
     return NextResponse.json({
-      total: 1176,
-      currentStreak: 12,
-      longestStreak: 16,
+      total: 1239,
+      currentStreak: 18,
+      longestStreak: 18,
       live: false,
     });
   }
 }
+

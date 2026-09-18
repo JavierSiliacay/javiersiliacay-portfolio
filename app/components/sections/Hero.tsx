@@ -181,14 +181,14 @@ const statsVariants: Variants = {
 export default function Hero() {
   // Dynamic live GitHub telemetry state
   const [githubStats, setGithubStats] = useState({
-    total: 1178,
-    currentStreak: 12,
-    longestStreak: 16,
+    total: 1239,
+    currentStreak: 18,
+    longestStreak: 18,
     live: false,
   });
 
   useEffect(() => {
-    fetch("/api/github-stats/")
+    fetch("/api/github-stats/", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (data && typeof data.total === "number") {
