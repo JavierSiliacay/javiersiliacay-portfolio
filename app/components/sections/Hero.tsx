@@ -5,6 +5,7 @@ import { ChevronRight, FileText, ArrowUpRight, Mail, Github, Flame } from "lucid
 import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
 import HeroAvatar from "../HeroAvatar";
+import { fetchGithubStats } from "@/app/lib/github";
 
 const GLYPHS = "0101XYZ_#<>/*+~&!";
 
@@ -188,8 +189,7 @@ export default function Hero() {
   });
 
   useEffect(() => {
-    fetch("/api/github-stats/", { cache: "no-store" })
-      .then((res) => res.json())
+    fetchGithubStats()
       .then((data) => {
         if (data && typeof data.total === "number") {
           setGithubStats(data);
