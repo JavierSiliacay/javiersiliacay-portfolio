@@ -37,6 +37,11 @@
     --halftone: rgba(10, 10, 10, 0.85);
     --selection-bg: #0a0a0a;
     --selection-fg: #ffffff;
+    --heatmap-0: #f0f0f4;
+    --heatmap-1: #a5f3fc;
+    --heatmap-2: #22d3ee;
+    --heatmap-3: #06b6d4;
+    --heatmap-4: #0e7490;
   }
 
   html.dark,
@@ -50,6 +55,11 @@
     --halftone: rgba(244, 244, 245, 0.35);
     --selection-bg: #fafafa;
     --selection-fg: #0a0a0a;
+    --heatmap-0: #1e1e26;
+    --heatmap-1: #0e4d5c;
+    --heatmap-2: #0e7490;
+    --heatmap-3: #06b6d4;
+    --heatmap-4: #22d3ee;
     color-scheme: dark;
   }
 

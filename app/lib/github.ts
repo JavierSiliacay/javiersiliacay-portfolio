@@ -1,24 +1,29 @@
-interface ContributionDay {
+export interface ContributionDay {
   date: string;
   count: number;
+  level: number; // 0-4 intensity from the API
 }
 
 interface ApiResponse {
   total: Record<string, number>;
-  contributions: ContributionDay[];
+  contributions: (ContributionDay)[];
 }
 
 export interface GithubStats {
   total: number;
   currentStreak: number;
   longestStreak: number;
+  streakStart: string;
+  streakEnd: string;
   live: boolean;
+  contributions: ContributionDay[];
 }
 
 export async function fetchGithubStats(): Promise<GithubStats> {
   try {
     const res = await fetch(
-      "https://github-contributions-api.jogruber.de/v4/JavierSiliacay"
+      "https://github-contributions-api.jogruber.de/v4/JavierSiliacay",
+      { cache: "no-store" }
     );
 
     if (!res.ok) {
@@ -71,23 +76,34 @@ export async function fetchGithubStats(): Promise<GithubStats> {
     }
 
     let currentStreak = 0;
+    const streakEnd = days[checkIndex]?.date || todayStr;
     while (checkIndex >= 0 && days[checkIndex].count > 0) {
       currentStreak++;
       checkIndex--;
     }
+    const streakStart = days[checkIndex + 1]?.date || streakEnd;
+
+    // 5. Filter contributions: only up to today (exclude future placeholder days)
+    const recentDays = days.filter((d) => d.date <= todayStr);
 
     return {
       total: totalContributions,
       currentStreak,
       longestStreak,
+      streakStart,
+      streakEnd,
       live: true,
+      contributions: recentDays,
     };
   } catch {
     return {
-      total: 1239,
-      currentStreak: 18,
-      longestStreak: 18,
+      total: 1362,
+      currentStreak: 30,
+      longestStreak: 30,
+      streakStart: "2026-09-01",
+      streakEnd: "2026-09-30",
       live: false,
+      contributions: [],
     };
   }
 }

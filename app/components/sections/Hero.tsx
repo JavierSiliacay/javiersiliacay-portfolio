@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ChevronRight, FileText, ArrowUpRight, Mail, Github, Flame } from "lucide-react";
-import { motion, type Variants } from "framer-motion";
+import { ChevronRight, ChevronDown, FileText, ArrowUpRight, Mail, Github, Flame } from "lucide-react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import Link from "next/link";
 import HeroAvatar from "../HeroAvatar";
+import ContributionHeatmap from "../ContributionHeatmap";
 import { fetchGithubStats } from "@/app/lib/github";
 
 const GLYPHS = "0101XYZ_#<>/*+~&!";
@@ -182,11 +183,15 @@ const statsVariants: Variants = {
 export default function Hero() {
   // Dynamic live GitHub telemetry state
   const [githubStats, setGithubStats] = useState({
-    total: 1239,
-    currentStreak: 18,
-    longestStreak: 18,
+    total: 1362,
+    currentStreak: 30,
+    longestStreak: 30,
+    streakStart: "2026-09-01",
+    streakEnd: "2026-09-30",
     live: false,
+    contributions: [] as { date: string; count: number; level: number }[],
   });
+  const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
   useEffect(() => {
     fetchGithubStats()
@@ -330,15 +335,31 @@ export default function Hero() {
             className="pt-6 border-t border-slate-200/80 dark:border-white/[0.08]"
           >
             <div
-              className="p-3.5 sm:p-4 rounded-2xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-white/[0.06] shadow-2xs cursor-default select-none"
+              className="p-3.5 sm:p-4 rounded-2xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-white/[0.06] shadow-2xs select-none transition-all duration-300"
             >
-              <div className="flex items-center gap-2 mb-3">
-                <Github size={14} className="text-slate-700 dark:text-slate-300" />
-                <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  GitHub Stats
-                </span>
+              {/* Header with expand toggle */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Github size={14} className="text-slate-700 dark:text-slate-300" />
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    GitHub Stats
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsStatsExpanded((prev) => !prev)}
+                  className="p-1 -m-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                  aria-label={isStatsExpanded ? "Collapse GitHub stats" : "Expand GitHub stats"}
+                >
+                  <motion.div
+                    animate={{ rotate: isStatsExpanded ? 180 : 0 }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                  >
+                    <ChevronDown size={16} className="text-slate-400 dark:text-slate-500" />
+                  </motion.div>
+                </button>
               </div>
 
+              {/* Stats row */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <div className="font-mono text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
@@ -377,6 +398,26 @@ export default function Hero() {
                   </div>
                 </div>
               </div>
+
+              {/* Expandable heatmap panel */}
+              <AnimatePresence initial={false}>
+                {isStatsExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-4 mt-4 border-t border-slate-200/60 dark:border-white/[0.06]">
+                      <ContributionHeatmap
+                        contributions={githubStats.contributions}
+                        weeks={20}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         </div>
