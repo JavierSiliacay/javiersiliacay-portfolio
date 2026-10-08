@@ -107,13 +107,11 @@ export default function AskOverlay({ isOpen, onClose }: AskOverlayProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Keyboard shortcut listener: ⌘K or Ctrl+K opens, Escape closes
+  // Keyboard shortcut listener: Escape closes modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if (e.key === "Escape" && isOpen) {
         e.preventDefault();
-        if (isOpen) onClose();
-      } else if (e.key === "Escape" && isOpen) {
         onClose();
       }
     };
@@ -124,7 +122,10 @@ export default function AskOverlay({ isOpen, onClose }: AskOverlayProps) {
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 80);
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 

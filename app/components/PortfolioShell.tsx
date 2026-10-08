@@ -1,11 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import AskOverlay from "./AskOverlay";
 
 export default function PortfolioShell({ children }: { children: React.ReactNode }) {
   const [askOpen, setAskOpen] = useState(false);
+
+  // Global ⌘K or Ctrl+K shortcut listener to toggle Ask AI overlay
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setAskOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="min-h-screen relative bg-[rgb(var(--bg))] text-[rgb(var(--ink))] transition-colors duration-400">
