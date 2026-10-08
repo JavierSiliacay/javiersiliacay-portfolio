@@ -24,14 +24,26 @@ const deckItems: DeckProject[] = [
   {
     id: "autoworx",
     title: "Autoworx Enterprise",
-    tagline: "Automotive Workshop ERP & AI Estimation",
-    category: "Production System",
+    tagline: "Automotive Workshop ERP & AI Diagnostics Platform",
+    category: "Production ERP",
     status: "In Production",
-    impact: "-40% manual reporting overhead in CDO",
+    impact: "Reduced manual reporting overhead by 40% in CDO",
     tech: ["Next.js 16", "Supabase", "PostgreSQL", "Google OAuth"],
     liveUrl: "https://autoworxcagayan.com",
     bgImage: "/autoworx-mockup.webp",
     logo: "/project-logos/autoworx.png",
+  },
+  {
+    id: "pangly",
+    title: "Pangly",
+    tagline: "100% On-Device AI Vault & Autonomous Action Agent",
+    category: "Mobile & Edge AI",
+    status: "Active Dev",
+    impact: "Zero-cloud edge LLM inference & encrypted document vault",
+    tech: ["React Native", "Expo 54", "Local LLMs", "LangGraph"],
+    liveUrl: "https://pangly.site",
+    bgImage: "/pangly-mockup.png",
+    logo: "/project-logos/pangly.png",
   },
   {
     id: "mekanik",
@@ -39,47 +51,11 @@ const deckItems: DeckProject[] = [
     tagline: "Hybrid Cloud & On-Device Vehicle Diagnostics",
     category: "AI & Mobile",
     status: "Active Dev",
-    impact: "Zero-latency offline DTC mechanical lookup",
+    impact: "Zero-latency offline DTC mechanical lookup & telemetry",
     tech: ["Android / Kotlin", "Offline LLMs", "OBD-II", "BLE"],
     liveUrl: "https://mekanikai.vercel.app/",
     bgImage: "/mekanik-mockup.png",
     logo: "/project-logos/mekanik.png",
-  },
-  {
-    id: "tarafix",
-    title: "TaraFix",
-    tagline: "Real-Time Auto-Shop & Mechanic Geolocation Marketplace",
-    category: "Web App & Freelance Mechanics",
-    status: "Active Dev",
-    impact: "Sub-second mechanic matching with geospatial caching",
-    tech: ["Next.js 16", "Leaflet Maps", "Upstash Redis", "TypeScript"],
-    liveUrl: "https://tarafix.vercel.app",
-    bgImage: "/tarafix-mockup.png",
-    logo: "/project-logos/tarafix.png",
-  },
-  {
-    id: "alk-trucking",
-    title: "ALK Trucking Logistics",
-    tagline: "Fleet Operations & Trip Manifest Management",
-    category: "Logistics & Fleet",
-    status: "In Production",
-    impact: "Digitalized trip manifests, driver dispatch & expense audits",
-    tech: ["Next.js 16", "Neon Postgres", "Drizzle ORM", "TypeScript"],
-    liveUrl: "https://alk-trucking.vercel.app",
-    bgImage: "/alk-trucking-mockup.webp",
-    logo: "/project-logos/alk.jpg",
-  },
-  {
-    id: "autoworx-paintcenter",
-    title: "Autoworx Paint Center",
-    tagline: "Automotive Color Formulation & Job Costing Suite",
-    category: "Production System",
-    status: "In Production",
-    impact: "Computerized paint mixing formulas & automated job order invoicing",
-    tech: ["Next.js 16", "Supabase", "PostgreSQL", "Tailwind CSS"],
-    liveUrl: "https://autoworxpaintcenter.vercel.app/login",
-    bgImage: "/paintcenter-mockup.webp",
-    logo: "/project-logos/paintcenter.png",
   },
 ];
 
@@ -98,9 +74,7 @@ export default function SpotlightDeck() {
     const diff = (idx - centerIndex + deckItems.length) % deckItems.length;
     if (diff === 0) return "is-center";
     if (diff === 1) return "is-right";
-    if (diff === 2) return "is-far-right";
-    if (diff === 3) return "is-far-left";
-    if (diff === 4) return "is-left";
+    if (diff === 2) return "is-left";
     return "";
   };
 

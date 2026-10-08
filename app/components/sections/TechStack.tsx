@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import Image from "next/image";
 import { 
   Globe2, 
   BrainCircuit, 
@@ -9,7 +11,13 @@ import {
   CheckCircle2, 
   Layers,
   ArrowRight,
-  Terminal
+  Terminal,
+  Play,
+  ExternalLink,
+  Maximize2,
+  X,
+  AlertTriangle,
+  ShieldAlert
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import TechLogo from "../TechLogos";
@@ -38,7 +46,9 @@ const capabilityPillars: CapabilityPillar[] = [
       "React 19",
       "TypeScript",
       "PostgreSQL",
+      "Neon Postgres",
       "Supabase (RLS)",
+      "Drizzle ORM",
       "Prisma ORM",
       "Firebase",
       "Node.js",
@@ -47,7 +57,8 @@ const capabilityPillars: CapabilityPillar[] = [
     ],
     capabilities: [
       "Server-rendered Next.js App Router architecture with streaming SSR",
-      "PostgreSQL schemas with Row-Level Security (RLS) & Prisma ORM",
+      "Serverless PostgreSQL (Neon) & Supabase with Row-Level Security (RLS)",
+      "Type-safe relational schema modeling & migrations with Drizzle & Prisma",
       "Real-time database subscriptions, webhooks, and state caching",
       "Automated invoice, billing ledger, and financial reporting modules"
     ],
@@ -61,22 +72,24 @@ const capabilityPillars: CapabilityPillar[] = [
     icon: BrainCircuit,
     description: "Engineering local and hybrid AI systems combining client-side WebGL computer vision, multi-point landmark estimation, and streaming LLM pipelines.",
     coreTech: [
+      "Local LLMs (llama.rn / GGUF)",
+      "LangGraph / ReAct Agents",
+      "React Native & Expo",
       "MediaPipe (Face, Hands, Pose)",
-      "OpenCV",
-      "TensorFlow / TensorFlow.js",
+      "TensorFlow.js",
       "Python",
       "LangChain",
-      "OpenAI APIs",
       "WebGL Acceleration",
       "Google Gemini APIs"
     ],
     capabilities: [
+      "100% on-device quantized LLM inference and cyclic ReAct agent tool execution",
       "Client-side 468-point 3D face mesh, skeletal pose, and dual-hand tracking",
       "Real-time 60 FPS gesture classification running 100% in-browser",
-      "Hybrid offline-capable LLM pipelines and RAG query structures",
+      "Hybrid offline-capable LLM pipelines, OCR gating, and biometric vault encryption",
       "Automated vehicle diagnostic and fault identification reasoning"
     ],
-    realWorldImpact: "Creator of the Multimodal AI Vision Lab (/vision) and Mekanik AI diagnostic assistant (mekanikai.vercel.app).",
+    realWorldImpact: "Creator of Pangly (100% on-device AI agent & vault, pangly.site), Multimodal AI Vision Lab (/vision), and Mekanik AI (mekanikai.vercel.app).",
     accentColor: "cyan",
   },
   {
@@ -130,15 +143,72 @@ const capabilityPillars: CapabilityPillar[] = [
   }
 ];
 
-const hardwareBench = [
-  { name: "ESP32-C3 Super Mini", desc: "RISC-V 160MHz SoC with Wi-Fi & BLE 5.0", badge: "Low-Power IoT" },
-  { name: "Realtek BW16 (RTL8720DN)", desc: "Dual-band 2.4G/5G Wi-Fi & BLE combo module", badge: "Dual-Band RF" },
-  { name: "Arduino Mega 2560 & Uno", desc: "54 digital I/O pins, 16 analog inputs, AVR core", badge: "Hardware Bench" },
-  { name: "ESP32 Dual-Core", desc: "240MHz Xtensa LX6, Wi-Fi web server & telemetry", badge: "IoT Core" },
+interface HardwareItem {
+  name: string;
+  desc: string;
+  badge: string;
+  imageUrl: string;
+  videoUrl?: string;
+  disclaimer?: string;
+}
+
+const hardwareBench: HardwareItem[] = [
+  {
+    name: "ESP32-C3 2.4GHz RF Jammer",
+    desc: "2.4GHz ISM-band RF signal disruption & carrier flooding using nRF24L01+ via high-speed SPI",
+    badge: "2.4GHz Pen-Testing",
+    imageUrl: "/hardware/rf-jammer.webp",
+    videoUrl: "https://vt.tiktok.com/ZSbgGek5q/",
+    disclaimer: "Strictly for educational RF resilience testing in a controlled lab sandbox. RF jamming in public airspace is prohibited by telecommunications law.",
+  },
+  {
+    name: "Realtek BW16 Dual-Band Deauther",
+    desc: "2.4GHz & 5GHz 802.11 deauth frame injection with on-chip web GUI & LED attack telemetry",
+    badge: "Wi-Fi Pen-Testing",
+    imageUrl: "/hardware/wifi-deauther.webp",
+    videoUrl: "https://vt.tiktok.com/ZSbgGXS3Y/",
+    disclaimer: "For educational security research & 802.11w PMF defense testing only. Unauthorized frame injection on third-party networks is prohibited.",
+  },
+  {
+    name: "ESP32 STT-to-TTS Voice Chatbot",
+    desc: "Real-time speech-to-text (STT) and voice synthesis (TTS) conversational AI chatbot on ESP32 with OLED/TFT display",
+    badge: "Voice AI Hardware",
+    imageUrl: "/hardware/voice-chatbot.webp",
+    videoUrl: "https://vt.tiktok.com/ZSbgGsXdr/",
+  },
+  {
+    name: "AI-Assisted Robot Car (MCP)",
+    desc: "Autonomous robotics platform controlled via Model Context Protocol (MCP) WebSockets with dual-motor PWM & ultrasonic sensing",
+    badge: "MCP Robotics",
+    imageUrl: "/hardware/robot-car.webp",
+    videoUrl: "https://vt.tiktok.com/ZSbgGmPhp/",
+  },
 ];
 
 export default function TechStack() {
   const [activeTab, setActiveTab] = useState<string>("fullstack");
+  const [inspectItem, setInspectItem] = useState<HardwareItem | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setInspectItem(null);
+    };
+    if (inspectItem) {
+      window.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [inspectItem]);
 
   const selectedPillar = capabilityPillars.find(p => p.id === activeTab) || capabilityPillars[0];
   const Icon = selectedPillar.icon;
@@ -290,7 +360,7 @@ export default function TechStack() {
             Hardware &amp; Prototyping Platforms
           </h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {hardwareBench.map((item, idx) => (
             <motion.div
               key={item.name}
@@ -298,24 +368,181 @@ export default function TechStack() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-30px" }}
               transition={{ duration: 0.3, delay: idx * 0.05, ease: [0.16, 1, 0.3, 1] }}
-              className="p-3.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-xs"
+              className="p-3 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-xs hover:border-cyan-500/40 transition-colors group/hw"
             >
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <TechLogo name={item.name} size={14} className="w-3.5 h-3.5 shrink-0" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">{item.name}</span>
+                {/* Physical Workbench Thumbnail */}
+                <button
+                  type="button"
+                  onClick={() => setInspectItem(item)}
+                  className="relative w-full aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-slate-950 border border-slate-200/80 dark:border-white/[0.08] cursor-pointer group/img block text-left"
+                  title={`Inspect workbench photo: ${item.name}`}
+                >
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover object-center group-hover/img:scale-105 transition-transform duration-300"
+                  />
+                  {/* Educational Warning Chip */}
+                  {item.disclaimer && (
+                    <div className="absolute top-2 left-2 z-10 text-[9px] font-bold text-amber-900 dark:text-amber-200 bg-amber-50/90 dark:bg-slate-950/85 backdrop-blur-xs px-2 py-0.5 rounded-full border border-amber-500/40 flex items-center gap-1 shadow-xs">
+                      <ShieldAlert size={10} className="text-amber-600 dark:text-amber-400" />
+                      <span>Educational Lab Only</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end justify-between p-2">
+                    <span className="text-[10px] font-medium text-white flex items-center gap-1 bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded-md">
+                      <Maximize2 size={10} />
+                      <span>Inspect Photo</span>
+                    </span>
                   </div>
+                </button>
+
+                <div className="flex items-center gap-2 mb-1.5">
+                  <TechLogo name={item.name} size={14} className="w-3.5 h-3.5 shrink-0" />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white truncate" title={item.name}>
+                    {item.name}
+                  </span>
                 </div>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">{item.desc}</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug line-clamp-2">{item.desc}</p>
+                {item.disclaimer && (
+                  <div className="mt-2 flex items-center gap-1 text-[10px] text-amber-700 dark:text-amber-400/90 font-medium">
+                    <AlertTriangle size={10} className="shrink-0 text-amber-600 dark:text-amber-400" />
+                    <span className="truncate">For educational purposes only</span>
+                  </div>
+                )}
               </div>
-              <span className="mt-3 text-[10px] font-bold text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 w-fit">
-                {item.badge}
-              </span>
+
+              <div className="mt-3 flex items-center justify-between gap-1.5 pt-2 border-t border-slate-100 dark:border-white/[0.04]">
+                <span className="text-[10px] font-bold text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 w-fit shrink-0">
+                  {item.badge}
+                </span>
+                {item.videoUrl && (
+                  <a
+                    href={item.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-400 transition-colors shrink-0 group/video"
+                    title={`Watch workbench demo: ${item.name}`}
+                  >
+                    <Play size={9} className="fill-current text-cyan-600 dark:text-cyan-400" />
+                    <span>Watch Demo</span>
+                    <ExternalLink size={9} className="opacity-60 group-hover/video:opacity-100" />
+                  </a>
+                )}
+              </div>
             </motion.div>
           ))}
         </div>
       </div>
+
+      {/* Hardware Photo Inspection Modal mounted via React Portal to document.body */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {inspectItem && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+              {/* Fullscreen Backdrop Blur covering entire window including sidebar */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setInspectItem(null)}
+                className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+              />
+
+              {/* Modal Container */}
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0, y: 12 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 12 }}
+                transition={{ type: "spring", damping: 28, stiffness: 350 }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative z-10 w-full max-w-lg max-h-[90vh] bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden"
+              >
+                {/* Header - Always pinned at top */}
+                <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <TechLogo name={inspectItem.name} size={18} className="shrink-0" />
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                        {inspectItem.name}
+                      </h3>
+                      <span className="text-[10px] font-bold text-cyan-700 dark:text-cyan-400">
+                        {inspectItem.badge} • Physical Prototype Verification
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setInspectItem(null)}
+                    className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
+                    aria-label="Close dialog"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {/* Scrollable Content Body */}
+                <div className="p-5 overflow-y-auto space-y-4">
+                  {/* High-res Image Preview */}
+                  <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] max-h-[42vh] rounded-2xl overflow-hidden bg-slate-950 border border-slate-200 dark:border-white/[0.08] shrink-0">
+                    <Image
+                      src={inspectItem.imageUrl}
+                      alt={inspectItem.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 520px"
+                      className="object-cover object-center"
+                      priority
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                    {inspectItem.desc}
+                  </p>
+
+                  {/* Compliance / Educational Warning in Modal */}
+                  {inspectItem.disclaimer && (
+                    <div className="p-3.5 rounded-xl bg-amber-500/[0.08] dark:bg-amber-500/10 border border-amber-500/25 flex items-start gap-2.5">
+                      <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div className="space-y-0.5 min-w-0">
+                        <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">
+                          Research &amp; Legal Notice
+                        </span>
+                        <p className="text-[11px] text-amber-900 dark:text-amber-200/90 leading-relaxed font-medium">
+                          {inspectItem.disclaimer}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Video Demo Action */}
+                  {inspectItem.videoUrl && (
+                    <div className="pt-3 border-t border-slate-100 dark:border-white/[0.05] flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Live bench test available
+                      </span>
+                      <a
+                        href={inspectItem.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-xs transition-colors shrink-0"
+                      >
+                        <Play size={11} className="fill-current" />
+                        <span>Watch Video Demo</span>
+                        <ExternalLink size={11} />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

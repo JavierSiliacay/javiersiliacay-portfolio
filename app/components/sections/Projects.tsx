@@ -16,10 +16,21 @@ import {
   Shield,
   Layers,
   TrendingUp,
+  Lock,
+  Car,
+  Palette,
+  Truck,
+  Building2,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import TechLogo from "../TechLogos";
+
+const ECOSYSTEM_TABS = [
+  { id: "autoworx-system", label: "Workshop ERP", icon: Car, isInternal: false },
+  { id: "autoworx-paintcenter", label: "Paint Center", icon: Palette, isInternal: true },
+  { id: "alk-trucking", label: "ALK Trucking", icon: Truck, isInternal: true },
+];
 
 interface ProjectItem {
   id: string;
@@ -33,6 +44,8 @@ interface ProjectItem {
   tech: string[];
   liveUrl?: string;
   isInternalRoute?: boolean;
+  isInternalTool?: boolean;
+  ecosystemBadge?: string;
   featured?: boolean;
   imagePreview?: string;
   logo?: string;
@@ -47,6 +60,7 @@ const projectsData: ProjectItem[] = [
     tagline: "Production Automotive Workshop ERP & AI Diagnostics Platform",
     category: "Production & Web",
     status: "In Production",
+    ecosystemBadge: "Core Platform",
     problem:
       "Automotive repair facilities suffer from fragmented pen-and-paper job orders, unpredictable repair estimates, and lack of real-time status visibility for vehicle owners.",
     solution:
@@ -66,6 +80,35 @@ const projectsData: ProjectItem[] = [
       "Real-time vehicle repair milestone tracking with customer notifications",
       "AI-assisted repair cost estimation and diagnostic summary engine",
       "Comprehensive parts inventory and supplier transaction ledger management",
+    ],
+  },
+  {
+    id: "pangly",
+    title: "Pangly",
+    tagline: "100% On-Device Autonomous Personal Life Agent & Encrypted Vault",
+    category: "AI & Vision",
+    status: "Active Development",
+    problem:
+      "Storing physical IDs, passwords, and sensitive documents across gallery folders and cloud servers exposes Filipinos to identity leaks, surveillance, and loss of critical records during network outages.",
+    solution:
+      "Architected a zero-cloud personal vault powered by an on-device LangGraph cyclic ReAct agent and local GGUF LLM inference (llama.rn), executing offline OCR, biometric hardware authentication, and natural language tool calls.",
+    impactMetric: "100% on-device AI inference with zero cloud servers, zero telemetry, and hardware-backed biometric security.",
+    tech: ["React Native", "Expo", "Local LLMs", "LangGraph", "TypeScript", "Biometrics", "OCR"],
+    liveUrl: "https://pangly.site",
+    featured: true,
+    imagePreview: "/pangly-mockup.png",
+    logo: "/project-logos/pangly.png",
+    architectures: [
+      "Cyclic ReAct state machine execution with Human-in-the-Loop (HITL) safety using LangGraph",
+      "On-device quantized LLM inference via llama.rn with smart context window packing",
+      "Hardware-backed biometric authentication (Face ID / Fingerprint) and AES-256 sandboxed isolated storage",
+      "Local optical character recognition (OCR) with automated clarity gating for Philippine IDs",
+    ],
+    keyFeatures: [
+      "Autonomous 'Ask & Act' action agent executing multi-step personal vault actions",
+      "Specialized parsing for Philippine Government IDs (PhilID, Driver's License, SSS, PhilHealth)",
+      "Hands-free voice dictation with local audio transcription and semantic indexing",
+      "Zero cloud dependence, zero telemetry, and master recovery phrase vault ownership",
     ],
   },
   {
@@ -200,14 +243,15 @@ const projectsData: ProjectItem[] = [
     tagline: "Fleet Operations, Trip Manifest & Fuel Expense Audit Platform",
     category: "Production & Web",
     status: "In Production",
+    isInternalTool: true,
+    ecosystemBadge: "Partner Company",
     problem:
       "Commercial freight and trucking operations lose thousands in unverified fuel reimbursements, lost paper trip receipts, and inefficient driver assignment scheduling.",
     solution:
       "Built an enterprise fleet and logistics portal digitalizing driver trip manifests, cargo destination dispatch, automated diesel consumption auditing, and financial expense verification.",
     impactMetric: "Automated end-to-end trip manifest recording and fuel expense reconciliation for commercial cargo haulers.",
     tech: ["Next.js 16", "Neon Postgres", "Drizzle ORM", "TypeScript", "Tailwind CSS", "NextAuth.js", "Leaflet Maps"],
-    liveUrl: "https://alk-trucking.vercel.app",
-    featured: true,
+    featured: false,
     imagePreview: "/alk-trucking-mockup.webp",
     logo: "/project-logos/alk.jpg",
     architectures: [
@@ -228,14 +272,15 @@ const projectsData: ProjectItem[] = [
     tagline: "Automotive Paint Formulation, Color Mixing & Job Order Billing Suite",
     category: "Production & Web",
     status: "In Production",
+    isInternalTool: true,
+    ecosystemBadge: "Partner Company",
     problem:
       "Automotive paint shops rely on manual swatch records, resulting in incorrect pigment ratios, paint batch waste, and inaccurate repair quotation estimates.",
     solution:
       "Engineered a precision color formulation and workshop billing suite with computerized mixing ratios, materials cost breakdown, and instant job order invoicing.",
     impactMetric: "Computerized paint formulations and automated job costing eliminating mixing discrepancies.",
     tech: ["Next.js 16", "TypeScript", "Supabase", "PostgreSQL", "Tailwind CSS"],
-    liveUrl: "https://autoworxpaintcenter.vercel.app/login",
-    featured: true,
+    featured: false,
     imagePreview: "/paintcenter-mockup.webp",
     logo: "/project-logos/paintcenter.png",
     architectures: [
@@ -298,23 +343,10 @@ const projectsData: ProjectItem[] = [
 ];
 
 export default function Projects() {
-  const [selectedFilter, setSelectedFilter] = useState<string>("All");
   const [activeModalProject, setActiveModalProject] = useState<ProjectItem | null>(null);
-
-  const filterCategories = [
-    { label: "All Projects", value: "All" },
-    { label: "Production & Web", value: "Production & Web" },
-    { label: "AI & Vision", value: "AI & Vision" },
-    { label: "IoT & Hardware", value: "IoT & Hardware" },
-  ];
+  const [activeEcosystemId, setActiveEcosystemId] = useState<string>("autoworx-system");
 
   const flagshipProjects = projectsData.filter((p) => p.featured);
-  const labProjects = projectsData.filter((p) => !p.featured);
-
-  const filteredLabProjects =
-    selectedFilter === "All"
-      ? labProjects
-      : labProjects.filter((p) => p.category === selectedFilter);
 
   return (
     <div className="w-full">
@@ -331,253 +363,223 @@ export default function Projects() {
         </div>
       </div>
 
-      {/* ── TIER 1: FLAGSHIP EDITORIAL CASE STUDIES ── */}
-      <div className="space-y-8 mb-20">
-        {flagshipProjects.map((project, idx) => (
-          <motion.div
-            key={project.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.42, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
-            className="rounded-3xl p-6 sm:p-8 lg:p-10 glass-panel border border-slate-200/90 dark:border-white/10 hover:border-cyan-500/40 transition-all duration-300 relative overflow-hidden group shadow-lg"
-          >
-            {/* Ambient Background Glow */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/[0.04] dark:bg-cyan-500/[0.06] blur-3xl rounded-full pointer-events-none" />
+      {/* ── FLAGSHIP EDITORIAL CASE STUDIES ── */}
+      <div className="space-y-8">
+        {flagshipProjects.map((project, idx) => {
+          const isEcosystem = project.id === "autoworx-system";
+          const currentProject = isEcosystem
+            ? projectsData.find((p) => p.id === activeEcosystemId) || project
+            : project;
 
-            {/* Ambient Background Mockup */}
-            {project.imagePreview && (
-              <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 overflow-hidden pointer-events-none opacity-15 dark:opacity-20 group-hover:opacity-25 transition-opacity duration-700 z-0">
-                <Image
-                  src={project.imagePreview}
-                  alt={project.title}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover object-top filter contrast-125 saturate-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-transparent dark:from-[#0c0c0f] dark:via-[#0c0c0f]/90 dark:to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-[#0c0c0f] dark:via-transparent to-transparent" />
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
-              {/* Left Overview Column */}
-              <div className="lg:col-span-7 space-y-4">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-lg border border-cyan-500/20">
-                    {project.category}
-                  </span>
-                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>{project.status}</span>
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                    {project.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm font-semibold text-cyan-700 dark:text-cyan-400 font-mono mt-1">
-                    {project.tagline}
-                  </p>
-                </div>
-
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {project.solution}
-                </p>
-
-                {/* Tech Stack Pills with Logos */}
-                <div className="flex flex-wrap gap-1.5 pt-2">
-                  {project.tech.map((t) => (
-                    <span
-                      key={t}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.08]"
-                    >
-                      <TechLogo name={t} size={13} className="w-3.5 h-3.5 shrink-0" />
-                      <span>{t}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right Metrics & Actions Column */}
-              <div className="lg:col-span-5 flex flex-col justify-between bg-slate-50/80 dark:bg-slate-950/60 p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] space-y-5">
-                {/* Visual Mockup Device Showcase Frame */}
-                {project.imagePreview && (
-                  <div className="relative w-full h-48 sm:h-56 rounded-xl overflow-hidden bg-slate-100/70 dark:bg-slate-950/80 border border-slate-200/80 dark:border-white/10 p-2 flex items-center justify-center shadow-xs group/preview">
-                    <Image
-                      src={project.imagePreview}
-                      alt={project.title}
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 420px"
-                      className="object-contain p-1.5 filter drop-shadow-xl group-hover/preview:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
-                    <TrendingUp size={12} className="text-cyan-600 dark:text-cyan-400" />
-                    <span>Key Result</span>
-                  </div>
-                  <div className="mt-1 text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
-                    {project.impactMetric}
-                  </div>
-                </div>
-
-                {/* Action Links */}
-                <div className="pt-3 border-t border-slate-200 dark:border-white/[0.06] flex items-center justify-between gap-3">
-                  <button
-                    onClick={() => setActiveModalProject(project)}
-                    className="text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 flex items-center gap-1.5 transition-colors"
-                  >
-                    <Eye size={14} />
-                    <span>Deep Dive</span>
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    {project.liveUrl &&
-                      (project.isInternalRoute ? (
-                        <Link
-                          href={project.liveUrl}
-                          className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all shadow-md shadow-cyan-600/20 flex items-center gap-1.5 hover:scale-[1.02]"
-                        >
-                          <span>Launch Live Lab</span>
-                          <ArrowUpRight size={14} />
-                        </Link>
-                      ) : (
-                        <a
-                          href={project.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all shadow-md shadow-cyan-600/20 flex items-center gap-1.5 hover:scale-[1.02]"
-                        >
-                          <span>Visit Production App</span>
-                          <ExternalLink size={14} />
-                        </a>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* ── TIER 2: ENGINEERING LAB & RESEARCH ARCHIVE ── */}
-      <div className="pt-10 border-t border-slate-200/80 dark:border-white/[0.08]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-          <div>
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              Lab &amp; Experiments
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Research prototypes, embedded firmware, and specialized tools.
-            </p>
-          </div>
-
-          {/* Filter Pills */}
-          <div className="flex flex-wrap gap-1.5">
-            {filterCategories.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => setSelectedFilter(cat.value)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${selectedFilter === cat.value
-                    ? "bg-cyan-600 text-white shadow-sm font-bold"
-                    : "bg-white/70 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-white/[0.06]"
-                  }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 2-Column Balanced Lab Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {filteredLabProjects.map((project, idx) => (
-            <motion.article
+          return (
+            <motion.div
               key={project.id}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.35, delay: (idx % 2) * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col justify-between rounded-2xl p-6 glass-card border border-slate-200/80 dark:border-white/[0.06] hover:border-cyan-500/40 transition-all duration-300 group shadow-xs"
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.42, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              className="rounded-3xl p-6 sm:p-8 lg:p-10 glass-panel border border-slate-200/90 dark:border-white/10 hover:border-cyan-500/40 transition-all duration-300 relative overflow-hidden group shadow-lg"
             >
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-md border border-cyan-500/20">
-                    {project.category}
-                  </span>
-                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                    {project.status}
-                  </span>
-                </div>
+              {/* Ambient Background Glow */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/[0.04] dark:bg-cyan-500/[0.06] blur-3xl rounded-full pointer-events-none" />
 
-                <div className="flex items-center gap-2.5 mb-2.5">
-                  {project.logo && (
-                    <div className="relative w-6 h-6 rounded-lg overflow-hidden shrink-0 border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-slate-900 shadow-xs flex items-center justify-center p-0.5">
-                      <Image
-                        src={project.logo}
-                        alt={`${project.title} logo`}
-                        width={24}
-                        height={24}
-                        className="object-contain w-full h-full rounded-xs"
-                      />
+              {/* Ambient Background Mockup */}
+              {currentProject.imagePreview && (
+                <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 overflow-hidden pointer-events-none opacity-100 dark:opacity-90 transition-opacity duration-500 z-0">
+                  <Image
+                    key={currentProject.imagePreview}
+                    src={currentProject.imagePreview}
+                    alt={currentProject.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover object-top filter contrast-125 saturate-110 transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-white via-white/70 to-transparent dark:from-[#0c0c0f] dark:via-[#0c0c0f]/75 dark:to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-[#0c0c0f] dark:via-transparent to-transparent" />
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
+                {/* Left Overview Column */}
+                <div className="lg:col-span-7 space-y-4">
+                  {/* Segmented Suite Switcher for Autoworx & Partner Companies */}
+                  {isEcosystem && (
+                    <div className="space-y-2 mb-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                          <Building2 size={13} className="text-cyan-600 dark:text-cyan-400" />
+                          <span>Autoworx &amp; Partner Companies</span>
+                        </span>
+                      </div>
+
+                      <div className="inline-flex items-center p-1 rounded-2xl bg-slate-100/90 dark:bg-white/[0.05] border border-slate-200/80 dark:border-white/10 shadow-xs">
+                        {ECOSYSTEM_TABS.map((tab) => {
+                          const isTabActive = activeEcosystemId === tab.id;
+                          const TabIcon = tab.icon;
+                          return (
+                            <button
+                              key={tab.id}
+                              type="button"
+                              onClick={() => setActiveEcosystemId(tab.id)}
+                              className={`relative px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer select-none ${
+                                isTabActive
+                                  ? "text-slate-900 dark:text-white font-bold"
+                                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                              }`}
+                            >
+                              {isTabActive && (
+                                <motion.div
+                                  layoutId="ecosystem-tab-active-pill"
+                                  className="absolute inset-0 bg-white dark:bg-slate-900 rounded-xl shadow-xs border border-slate-200/80 dark:border-white/10"
+                                  transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                                />
+                              )}
+                              <span className="relative z-10 flex items-center gap-1.5">
+                                <TabIcon size={13} className={isTabActive ? "text-cyan-600 dark:text-cyan-400" : "opacity-70"} />
+                                <span>{tab.label}</span>
+                                {tab.isInternal && <Lock size={10} className="text-amber-500 opacity-90" />}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
-                  <h4 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors leading-snug">
-                    {project.title}
-                  </h4>
-                </div>
 
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-                  {project.solution}
-                </p>
-
-                {/* Tech Pills */}
-                <div className="flex flex-wrap gap-1.5 mb-5">
-                  {project.tech.slice(0, 4).map((t) => (
-                    <span
-                      key={t}
-                      className="px-2.5 py-0.5 text-[11px] font-medium rounded-md bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-white/[0.04]"
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentProject.id}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-4"
                     >
-                      {t}
-                    </span>
-                  ))}
-                  {project.tech.length > 4 && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-md text-slate-400">
-                      +{project.tech.length - 4}
-                    </span>
-                  )}
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <span className="text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-lg border border-cyan-500/20">
+                          {currentProject.category}
+                        </span>
+                        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>{currentProject.status}</span>
+                        </span>
+                        {currentProject.ecosystemBadge && (
+                          <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 flex items-center gap-1.5">
+                            <Shield size={11} className="text-amber-500" />
+                            <span>{currentProject.ecosystemBadge}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      <div>
+                        <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                          {currentProject.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm font-semibold text-cyan-700 dark:text-cyan-400 font-mono mt-1">
+                          {currentProject.tagline}
+                        </p>
+                      </div>
+
+                      <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        {currentProject.solution}
+                      </p>
+
+                      {/* Tech Stack Pills with Logos */}
+                      <div className="flex flex-wrap gap-1.5 pt-2">
+                        {currentProject.tech.map((t) => (
+                          <span
+                            key={t}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.08]"
+                          >
+                            <TechLogo name={t} size={13} className="w-3.5 h-3.5 shrink-0" />
+                            <span>{t}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
+                {/* Right Metrics & Actions Column */}
+                <div className="lg:col-span-5 flex flex-col justify-between bg-slate-50/80 dark:bg-slate-950/60 p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] space-y-5">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentProject.id}
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-5"
+                    >
+                      {/* Visual Mockup Device Showcase Frame */}
+                      {currentProject.imagePreview && (
+                        <div className="relative w-full h-48 sm:h-56 rounded-xl overflow-hidden bg-slate-100/70 dark:bg-slate-950/80 border border-slate-200/80 dark:border-white/10 p-2 flex items-center justify-center shadow-xs group/preview">
+                          <Image
+                            src={currentProject.imagePreview}
+                            alt={currentProject.title}
+                            fill
+                            sizes="(max-width: 1024px) 100vw, 420px"
+                            className="object-contain p-1.5 filter drop-shadow-xl group-hover/preview:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      )}
+
+                      <div>
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
+                          <TrendingUp size={12} className="text-cyan-600 dark:text-cyan-400" />
+                          <span>Key Result</span>
+                        </div>
+                        <div className="mt-1 text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
+                          {currentProject.impactMetric}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+
+                  {/* Action Links */}
+                  <div className="pt-3 border-t border-slate-200 dark:border-white/[0.06] flex items-center justify-between gap-3">
+                    <button
+                      onClick={() => setActiveModalProject(currentProject)}
+                      className="text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Eye size={14} />
+                      <span>Deep Dive</span>
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      {currentProject.liveUrl ? (
+                        currentProject.isInternalRoute ? (
+                          <Link
+                            href={currentProject.liveUrl}
+                            className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all shadow-md shadow-cyan-600/20 flex items-center gap-1.5 hover:scale-[1.02]"
+                          >
+                            <span>Launch Live Lab</span>
+                            <ArrowUpRight size={14} />
+                          </Link>
+                        ) : (
+                          <a
+                            href={currentProject.liveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all shadow-md shadow-cyan-600/20 flex items-center gap-1.5 hover:scale-[1.02]"
+                          >
+                            <span>Visit Production App</span>
+                            <ExternalLink size={14} />
+                          </a>
+                        )
+                      ) : currentProject.isInternalTool ? (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 text-xs font-semibold">
+                          <Lock size={12} className="text-amber-500" />
+                          <span>Internal Enterprise Tool</span>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* Card Footer */}
-              <div className="pt-3.5 border-t border-slate-200/70 dark:border-white/[0.06] flex items-center justify-between">
-                <button
-                  onClick={() => setActiveModalProject(project)}
-                  className="text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 flex items-center gap-1.5 transition-colors"
-                >
-                  <Eye size={13} />
-                  <span>Deep Dive</span>
-                </button>
-
-                {project.liveUrl && (
-                  <a
-                    href={project.liveUrl}
-                    target={project.isInternalRoute ? "_self" : "_blank"}
-                    rel={project.isInternalRoute ? "" : "noopener noreferrer"}
-                    className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1 transition-colors"
-                  >
-                    <span>{project.isInternalRoute ? "Launch Lab" : "Live Demo"}</span>
-                    <ArrowUpRight size={13} />
-                  </a>
-                )}
-              </div>
-            </motion.article>
-          ))}
-        </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Case Study Detail Modal */}
@@ -603,7 +605,18 @@ export default function Projects() {
                   {activeModalProject.category} &bull; {activeModalProject.status}
                 </span>
                 <div className="flex items-center gap-3 mt-3">
-                  {activeModalProject.logo && (
+                  {activeModalProject.id === "pangly" ? (
+                    <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 shadow-xs flex items-center justify-center p-1">
+                      <Image
+                        src="/pangly_waving.gif"
+                        alt="Pangly Mascot"
+                        width={36}
+                        height={36}
+                        unoptimized
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : activeModalProject.logo ? (
                     <div className="relative w-8 h-8 rounded-xl overflow-hidden shrink-0 border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 shadow-sm flex items-center justify-center p-1">
                       <Image
                         src={activeModalProject.logo}
@@ -613,7 +626,7 @@ export default function Projects() {
                         className="object-contain w-full h-full rounded-md"
                       />
                     </div>
-                  )}
+                  ) : null}
                   <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
                     {activeModalProject.title}
                   </h3>
@@ -622,6 +635,24 @@ export default function Projects() {
                   {activeModalProject.tagline}
                 </p>
               </div>
+
+              {/* Pangly Document Vault Showcase Banner */}
+              {activeModalProject.id === "pangly" && (
+                <div className="relative w-full h-44 sm:h-52 rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-xs bg-slate-100 dark:bg-slate-950 flex items-center justify-center">
+                  <Image
+                    src="/pangly_phone_ad.jpg"
+                    alt="Philippine Documents in Pangly Vault"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 600px"
+                    className="object-cover object-center filter contrast-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-3">
+                    <span className="text-[11px] font-mono text-white/90 bg-black/40 px-2.5 py-1 rounded-lg backdrop-blur-xs border border-white/10">
+                      Optimized for Philippine Government IDs &amp; Offline Documents
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Problem & Solution Breakdown */}
               <div className="space-y-4 text-sm text-slate-700 dark:text-slate-300">
@@ -703,28 +734,47 @@ export default function Projects() {
               </div>
 
               {/* Modal CTAs */}
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
-                {activeModalProject.liveUrl &&
-                  (activeModalProject.isInternalRoute ? (
-                    <Link
-                      href={activeModalProject.liveUrl}
-                      onClick={() => setActiveModalProject(null)}
-                      className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition-colors flex items-center gap-1.5"
-                    >
-                      <span>Launch Experiment</span>
-                      <ArrowUpRight size={14} />
-                    </Link>
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                {activeModalProject.isInternalTool ? (
+                  <div className="inline-flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                    <Lock size={13} />
+                    <span>Proprietary Enterprise Platform (Role-Gated)</span>
+                  </div>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex items-center gap-2">
+                  {activeModalProject.liveUrl ? (
+                    activeModalProject.isInternalRoute ? (
+                      <Link
+                        href={activeModalProject.liveUrl}
+                        onClick={() => setActiveModalProject(null)}
+                        className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition-colors flex items-center gap-1.5"
+                      >
+                        <span>Launch Experiment</span>
+                        <ArrowUpRight size={14} />
+                      </Link>
+                    ) : (
+                      <a
+                        href={activeModalProject.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition-colors flex items-center gap-1.5"
+                      >
+                        <span>Visit Live Platform</span>
+                        <ExternalLink size={14} />
+                      </a>
+                    )
                   ) : (
-                    <a
-                      href={activeModalProject.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition-colors flex items-center gap-1.5"
+                    <button
+                      onClick={() => setActiveModalProject(null)}
+                      className="px-5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors"
                     >
-                      <span>Visit Live Platform</span>
-                      <ExternalLink size={14} />
-                    </a>
-                  ))}
+                      Close Case Study
+                    </button>
+                  )}
+                </div>
               </div>
             </motion.div>
           </div>

@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const messages = body.messages || [];
     const apiKey = process.env.OPENROUTER_API_KEY;
-    const model = process.env.CHATBOT_MODEL || "openrouter/owl-alpha";
+    const primaryModel = process.env.CHATBOT_MODEL || "nvidia/nemotron-3-super-120b-a12b:free";
 
     if (!apiKey) {
       console.error("Error: OPENROUTER_API_KEY is missing from environment variables.");
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: model,
+        models: [primaryModel, "openrouter/free"],
         stream: true,
         temperature: 0.65,
         max_tokens: 850,
@@ -35,7 +35,7 @@ Your mission is to represent Javier with technical authority, precision, and cla
 - Full Name: Javier Siliacay
 - Title: Software Engineer & AI Specialist | IoT & Embedded Systems Builder
 - Location: Cagayan de Oro City, Philippines (Available worldwide for remote full-time roles, contracts, and freelance projects)
-- Academic Background: B.S. in Autotronics at the University of Science and Technology of Southern Philippines (USTP) — a specialized engineering discipline combining Automotive Systems, Electronics, Microcontrollers, and Software Engineering.
+- Academic Background: B.S. in Autotronics graduate from the University of Science and Technology of Southern Philippines (USTP) — a specialized engineering discipline combining Automotive Systems, Electronics, Microcontrollers, and Software Engineering.
 - Contact Channels:
   * Email: siliacay.javier@gmail.com
   * Phone / WhatsApp: +63 997 837 9342
@@ -48,27 +48,27 @@ Your mission is to represent Javier with technical authority, precision, and cla
 - International peer-reviewed conference publication.
 
 ### Flagship Production Systems & Projects:
-1. **Autoworx Enterprise**: Flagship production ERP platform for automotive repair facilities.
-   - Stack: Next.js 15, TypeScript, Supabase (PostgreSQL), Tailwind CSS.
-   - Capabilities: Multi-tenant work order scheduling, real-time parts inventory tracking, automated estimate & invoice generation, technician dispatch, and business analytics.
-2. **Mekanik AI**: Specialized AI automotive diagnostic assistant.
-   - Stack: Next.js, OpenRouter AI / LLMs, TypeScript, Tailwind CSS.
-   - Capabilities: Troubleshoots vehicle symptoms, decodes OBD-II DTC fault codes, and delivers step-by-step mechanical repair workflows.
-3. **ALK Trucking**: Logistics dispatch and fleet management platform.
-   - Stack: Next.js, TypeScript, Tailwind CSS, REST APIs.
-   - Capabilities: Real-time commercial freight routing, cargo dispatch schedules, driver payroll tracking, and vehicle maintenance logs.
-4. **Autoworx Paint Center**: Vehicle refinishing pipeline management system.
-   - Stack: Next.js, React, Tailwind CSS.
-   - Capabilities: Color code formulation indexing, stage tracking (prep, primer, base coat, clear coat, cure oven), and throughput metrics.
-5. **TaraFix**: On-demand on-call home & appliance repair marketplace.
-   - Stack: Next.js, TypeScript, Supabase, Redis, TanStack Query.
-   - Capabilities: Customer booking, vetted technician matching, automated dispatch, and status tracking.
-6. **Multimodal AI Vision Lab**: In-browser edge computer vision laboratory.
+1. **Pangly**: 100% on-device autonomous personal life agent & encrypted vault (Live: pangly.site).
+   - Stack: React Native, Expo 54, Local LLMs (llama.rn / Qwen GGUF), LangGraph ReAct agent graph, TypeScript, Biometrics.
+   - Capabilities: 100% offline edge AI inference with zero cloud servers or telemetry, hardware-backed biometric authentication (Face ID / Fingerprint), AES-256 sandboxed isolated storage, local OCR extraction & clarity gating for Philippine IDs (PhilID, Driver's License, SSS, PhilHealth), voice dictation, and autonomous tool calling.
+2. **Autoworx Enterprise Platform**: Flagship production automotive workshop ERP and AI diagnostics platform (Live: autoworxcagayan.com).
+   - Stack: Next.js 16, TypeScript, Supabase (PostgreSQL RLS), Tailwind CSS, Google OAuth.
+   - Capabilities: Multi-tenant work order scheduling, real-time parts inventory tracking, automated estimate & invoice calculation engine, mechanic dispatch, and business analytics.
+3. **Mekanik AI**: Specialized hybrid cloud and on-device automotive AI diagnostic assistant (Live: mekanikai.vercel.app).
+   - Stack: Android / Kotlin, Offline LLMs, OBD-II Protocols (ELM327), Bluetooth BLE, Next.js.
+   - Capabilities: Troubleshoots vehicle symptoms in remote off-grid locations, decodes OBD-II DTC fault codes, and delivers live engine telemetry.
+4. **Autoworx & Partner Companies (Internal Tools)**:
+   - **ALK Trucking**: Proprietary fleet operations, trip manifest dispatch, and fuel expense audit platform engineered for Autoworx's logistics partner company (Stack: Next.js 16, Neon Postgres, Drizzle ORM). Role-gated internal tool.
+   - **Autoworx Paint Center**: Proprietary automotive paint formulation, precision color mixing ratio calculator, and workshop billing suite for Autoworx refinishing facilities (Stack: Next.js 16, Supabase, PostgreSQL). Role-gated internal tool.
+5. **TaraFix**: On-demand real-time auto-shop and mechanic geolocation marketplace (Live: tarafix.vercel.app).
+   - Stack: Next.js 16, TypeScript, Leaflet Maps, Upstash Redis caching, TanStack Query.
+   - Capabilities: Real-time driver-to-mechanic geolocation matching with sub-second queries across Philippine roads.
+6. **Multimodal AI Vision Lab**: In-browser edge computer vision laboratory (Live route: /vision).
    - Stack: TensorFlow.js, MediaPipe, WebGL, Canvas API, Next.js.
-   - Capabilities: 100% client-side 60 FPS real-time facial mesh, hand tracking, pose detection, and interactive DBZ anime energy aura visual effects with 0ms server latency.
-7. **CircuitoAI**: Real-time IoT hardware and serial diagnostic suite.
+   - Capabilities: 100% client-side 60 FPS real-time facial mesh (468 landmarks), hand tracking, and skeletal pose detection with 0ms server latency.
+7. **CircuitoAI**: Real-time IoT hardware and browser serial diagnostic suite.
    - Stack: Next.js, Web Serial API, C++, Microcontrollers.
-   - Capabilities: Live serial telemetry streaming and AI-assisted circuit debugging.
+   - Capabilities: Live bidirectional serial telemetry streaming and AI-assisted circuit debugging in-browser.
 8. **Sadbai AI**: Empathetic conversational companion developed in a 24-hour speedrun.
    - Stack: Next.js, LangChain.
 

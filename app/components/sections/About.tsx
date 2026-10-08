@@ -2,12 +2,9 @@
 
 import {
   Briefcase,
-  GraduationCap,
-  Award,
   FileText,
   ExternalLink,
   MapPin,
-  CheckCircle2,
   BookOpen,
   ArrowUpRight,
 } from "lucide-react";
@@ -20,7 +17,6 @@ interface ExperienceItem {
   role: string;
   organization: string;
   description: string;
-  highlights: string[];
 }
 
 const experienceData: ExperienceItem[] = [
@@ -29,35 +25,21 @@ const experienceData: ExperienceItem[] = [
     role: "Full-Stack Lead Developer & Systems Architect",
     organization: "Autoworx & Partner Companies",
     description:
-      "Architecting, deploying, and managing the core software ecosystem across multiple commercial companies—including enterprise automotive ERP platforms, logistics dispatch suites, and AI diagnostic tools.",
-    highlights: [
-      "Architect and scale multi-tenant web platforms (Next.js, TypeScript, PostgreSQL, REST APIs) powering automotive shop operations and freight logistics",
-      "Integrated custom AI Diagnostics Engine & automated financial pipelines, accelerating reporting and troubleshooting turnaround by 40%",
-      "Engineered 20+ responsive web interfaces & role-based portals for dispatchers, mechanics, drivers, and enterprise admins",
-      "Oversee database reliability, secure access policies (RLS), and real-time state sync across live commercial business workflows",
-    ],
+      "Directing end-to-end software development across Autoworx and partner companies—engineering operations platforms that digitize vehicle repair tracking, customer billing, and freight logistics dispatch.",
   },
   {
     period: "2025 (PUBLISHED)",
     role: "Lead Developer & Published Researcher",
-    organization: "Univ. of Aizu, Japan (ICFSS-DLIIMST-ICSES-ICSSE 2025)",
+    organization: "Univ. of Aizu, Japan",
     description:
-      "Authored and presented thesis research on real-time automotive engine oil contamination monitoring using an ESP32 web server and optical turbidity sensing.",
-    highlights: [
-      "Engineered IoT firmware and telemetry streaming on ESP32 microcontroller",
-      "Published in international peer-reviewed conference proceedings in Japan",
-    ],
+      "Authored and presented peer-reviewed automotive sensor research at an international engineering conference in Japan, monitoring engine oil health in real time.",
   },
   {
     period: "2024 — 2025",
     role: "Robotics Mentor & Hardware Trainer",
     organization: "USTP College of Technology Extension",
     description:
-      "Mentored 20+ student teams in mechanical design, Arduino/ESP32 programming, and algorithmic navigation for the National Robotics Competition (NRC 2025).",
-    highlights: [
-      "Optimized sensor feedback and line-tracking PID control algorithms",
-      "Led hardware assembly, schematic reading, and embedded systems bootcamps",
-    ],
+      "Mentored 20+   student teams in embedded systems, circuit prototyping, and autonomous navigation for the National Robotics Competition (NRC2025).",
   },
 ];
 
@@ -97,7 +79,7 @@ export default function About() {
               >
                 <div className="absolute left-2 top-1.5 w-3 h-3 rounded-full bg-white dark:bg-slate-900 border-2 border-cyan-500 group-hover:scale-125 transition-transform" />
 
-                <div className="p-5 sm:p-6 rounded-2xl glass-card border border-slate-200/80 dark:border-white/[0.06] hover:border-cyan-500/40 transition-all space-y-2.5">
+                <div className="p-5 sm:p-6 rounded-2xl glass-card border border-slate-200/80 dark:border-white/[0.06] hover:border-cyan-500/40 transition-all space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-[10px] font-mono font-bold text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-500/10">
                       {item.period}
@@ -114,15 +96,6 @@ export default function About() {
                   <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                     {item.description}
                   </p>
-
-                  <ul className="pt-2 space-y-1.5">
-                    {item.highlights.map((hl, hIdx) => (
-                      <li key={hIdx} className="text-xs text-slate-600 dark:text-slate-400 flex items-start gap-2">
-                        <CheckCircle2 size={13} className="text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
-                        <span>{hl}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
               </motion.div>
             ))}

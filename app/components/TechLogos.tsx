@@ -273,6 +273,45 @@ export default function TechLogo({ name, className = "w-3.5 h-3.5 shrink-0", siz
     );
   }
 
+  // No-WiFi / RF Jammer / WiFi Deauther (Slashed Wi-Fi Logo matching second image)
+  if (lower.includes("jammer") || lower.includes("deauth")) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M12 20h.01" strokeWidth="3" />
+        <path d="M8.5 16.43a5 5 0 0 1 7 0" />
+        <path d="M5 12.86a10 10 0 0 1 5.17-2.69" />
+        <path d="M19 12.86a10 10 0 0 0-2.01-1.52" />
+        <path d="M2 8.82a15 15 0 0 1 4.18-2.64" />
+        <path d="M22 8.82a15 15 0 0 0-11.29-3.76" />
+        <line x1="2" y1="2" x2="22" y2="22" stroke="#EF4444" strokeWidth="2.5" />
+      </svg>
+    );
+  }
+
+  // Voice AI / Audio / STT / TTS / Chatbot
+  if (lower.includes("voice") || lower.includes("audio") || lower.includes("mic") || lower.includes("stt") || lower.includes("tts") || lower.includes("chatbot")) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" fill="#A855F7" fillOpacity="0.2" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" x2="12" y1="19" y2="22" />
+      </svg>
+    );
+  }
+
+  // Robotics / Robot Car / MCP Hardware
+  if (lower.includes("robot") || lower.includes("mcp")) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <rect x="3" y="11" width="18" height="10" rx="2" fill="#10B981" fillOpacity="0.15" />
+        <circle cx="12" cy="5" r="2" />
+        <path d="M12 7v4" />
+        <line x1="8" y1="16" x2="8.01" y2="16" strokeWidth="3" />
+        <line x1="16" y1="16" x2="16.01" y2="16" strokeWidth="3" />
+      </svg>
+    );
+  }
+
   // ESP32 / Espressif / Microcontroller SoC
   if (lower.includes("esp32") || lower.includes("esp8266") || lower.includes("realtek") || lower.includes("risc-v")) {
     return (
@@ -343,6 +382,48 @@ export default function TechLogo({ name, className = "w-3.5 h-3.5 shrink-0", siz
         <circle cx="42" cy="80" r="7" fill="#FFFFFF" />
         <circle cx="86" cy="80" r="7" fill="#FFFFFF" />
         <path d="M38 48h52l-6-14H44l-6 14z" fill="#0369A1" />
+      </svg>
+    );
+  }
+
+  // Expo
+  if (lower.includes("expo")) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+        <path d="M4.5 19.5L12 4.5L19.5 19.5H4.5Z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
+        <path d="M8.5 14.5L12 7.5L15.5 14.5H8.5Z" fill="currentColor" opacity="0.6" />
+      </svg>
+    );
+  }
+
+  // LangGraph / Agent Graphs
+  if (lower.includes("langgraph") || lower.includes("agent") || lower.includes("react agent")) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+        <circle cx="5" cy="12" r="3" stroke="#8B5CF6" strokeWidth="2" fill="#8B5CF6" fillOpacity="0.2" />
+        <circle cx="19" cy="6" r="3" stroke="#8B5CF6" strokeWidth="2" fill="#8B5CF6" fillOpacity="0.2" />
+        <circle cx="19" cy="18" r="3" stroke="#8B5CF6" strokeWidth="2" fill="#8B5CF6" fillOpacity="0.2" />
+        <path d="M8 12H12M12 12L16 6M12 12L16 18" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  // Local LLMs / Quantized AI / Qwen / Edge AI
+  if (lower.includes("llm") || lower.includes("local ai") || lower.includes("qwen") || lower.includes("gguf")) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+        <rect x="3" y="3" width="18" height="18" rx="5" stroke="#10B981" strokeWidth="2" />
+        <path d="M9 9H15M9 12H15M9 15H12" stroke="#10B981" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  // Biometrics / Hardware Security
+  if (lower.includes("biometric") || lower.includes("security") || lower.includes("vault")) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#06B6D4" strokeWidth="2" strokeLinejoin="round" fill="#06B6D4" fillOpacity="0.15" />
+        <path d="M9 12l2 2 4-4" stroke="#06B6D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     );
   }
