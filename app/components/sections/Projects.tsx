@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ExternalLink,
@@ -346,6 +346,27 @@ export default function Projects() {
   const [activeModalProject, setActiveModalProject] = useState<ProjectItem | null>(null);
   const [activeEcosystemId, setActiveEcosystemId] = useState<string>("autoworx-system");
 
+  // Handle ESC key and scroll locking when project detail modal is open
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActiveModalProject(null);
+      }
+    };
+
+    if (activeModalProject) {
+      window.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [activeModalProject]);
+
   const flagshipProjects = projectsData.filter((p) => p.featured);
 
   return (
@@ -585,17 +606,23 @@ export default function Projects() {
       {/* Case Study Detail Modal */}
       <AnimatePresence>
         {activeModalProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md">
+          <div 
+            onClick={() => setActiveModalProject(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md cursor-pointer"
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0b0f19] border border-slate-200 dark:border-white/[0.12] p-6 sm:p-8 shadow-2xl space-y-6"
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0b0f19] border border-slate-200 dark:border-white/[0.12] p-6 sm:p-8 shadow-2xl space-y-6 cursor-default"
             >
               {/* Close Button */}
               <button
+                type="button"
                 onClick={() => setActiveModalProject(null)}
-                className="absolute top-5 right-5 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                aria-label="Close modal"
+                className="absolute top-5 right-5 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
