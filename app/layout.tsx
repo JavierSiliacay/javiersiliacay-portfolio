@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Javiers Siliacay | Software Developer & AI Engineer",
+  title: "Javier Siliacay | Software Developer & AI Engineer",
   description: "Portfolio of Javier Siliacay — Software Developer & AI Engineer. Architecting high-performance full-stack web applications, computer vision systems, and intelligent IoT solutions.",
   keywords: [
     "Javier Siliacay",
