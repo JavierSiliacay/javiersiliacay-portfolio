@@ -53,10 +53,14 @@ const capabilityPillars: CapabilityPillar[] = [
       "Firebase",
       "Node.js",
       "Tailwind CSS v4",
+      "Convex",
+      "React Native",
+      "Cloudflare Workers",
       "Vercel Edge"
     ],
     capabilities: [
       "Server-rendered Next.js App Router architecture with streaming SSR",
+      "Edge deployment on Cloudflare Workers with Vinext & Vite",
       "Serverless PostgreSQL (Neon) & Supabase with Row-Level Security (RLS)",
       "Type-safe relational schema modeling & migrations with Drizzle & Prisma",
       "Real-time database subscriptions, webhooks, and state caching",

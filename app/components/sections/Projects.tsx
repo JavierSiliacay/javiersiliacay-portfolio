@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ExternalLink,
@@ -21,6 +22,7 @@ import {
   Palette,
   Truck,
   Building2,
+  Maximize2,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -81,6 +83,31 @@ const projectsData: ProjectItem[] = [
       "AI-assisted repair cost estimation and diagnostic summary engine",
       "Comprehensive parts inventory and supplier transaction ledger management",
     ],
+  },
+  {
+    id: "rescom-alert",
+    title: "RESCOM Alert (Web Portal + Android App)",
+    tagline: "Official Rapid Mobilization & Emergency Alert System for 10RCDG",
+    category: "Production & Web",
+    status: "In Production",
+    problem: "10RCDG (10th Regional Community Defense Group, Reserve Command, PA) needed a reliable, instant way to reach reservists and coordinate rapid mobilization during emergencies and tactical readiness checks.",
+    solution: "Designed and delivered a unified command web portal and mobile companion app so 10RCDG personnel receive high-priority alerts, confirm readiness, and stay synchronized in real time.",
+    impactMetric: "Active Tactical Readiness & Alert System for 10RCDG",
+    tech: [],
+    isInternalTool: true,
+    featured: true,
+    imagePreview: "/projects/rescom-preview.jpg",
+    architectures: [
+      "Unified command web portal & Android companion app",
+      "Real-time readiness status & personnel coordination",
+      "High-priority emergency alert & siren delivery",
+      "Geo-fenced rate-limited Cloudflare WAF, Turnstile, TLS & CSP securing validated auth, audited unit RBAC, AES-GCM/HMAC & device/SMS-hash"
+    ],
+    keyFeatures: [
+      "Instant emergency alert & siren notifications for 10RCDG personnel",
+      "Live tactical readiness & response confirmation",
+      "Web Portal + Android App access for command and field units"
+    ]
   },
   {
     id: "pangly",
@@ -345,12 +372,14 @@ const projectsData: ProjectItem[] = [
 export default function Projects() {
   const [activeModalProject, setActiveModalProject] = useState<ProjectItem | null>(null);
   const [activeEcosystemId, setActiveEcosystemId] = useState<string>("autoworx-system");
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; title: string } | null>(null);
 
   // Handle ESC key and scroll locking when project detail modal is open
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setActiveModalProject(null);
+        setLightboxImage(null);
       }
     };
 
@@ -404,25 +433,9 @@ export default function Projects() {
               {/* Ambient Background Glow */}
               <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/[0.04] dark:bg-cyan-500/[0.06] blur-3xl rounded-full pointer-events-none" />
 
-              {/* Ambient Background Mockup */}
-              {currentProject.imagePreview && (
-                <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 overflow-hidden pointer-events-none opacity-100 dark:opacity-90 transition-opacity duration-500 z-0">
-                  <Image
-                    key={currentProject.imagePreview}
-                    src={currentProject.imagePreview}
-                    alt={currentProject.title}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover object-top filter contrast-125 saturate-110 transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-white via-white/70 to-transparent dark:from-[#0c0c0f] dark:via-[#0c0c0f]/75 dark:to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-[#0c0c0f] dark:via-transparent to-transparent" />
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
                 {/* Left Overview Column */}
-                <div className="lg:col-span-7 space-y-4">
+                <div className="lg:col-span-6 space-y-4">
                   {/* Segmented Suite Switcher for Autoworx & Partner Companies */}
                   {isEcosystem && (
                     <div className="space-y-2 mb-2">
@@ -522,7 +535,7 @@ export default function Projects() {
                 </div>
 
                 {/* Right Metrics & Actions Column */}
-                <div className="lg:col-span-5 flex flex-col justify-between bg-slate-50/80 dark:bg-slate-950/60 p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] space-y-5">
+                <div className="lg:col-span-6 flex flex-col justify-between bg-slate-50/80 dark:bg-slate-950/60 p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.06] space-y-5">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={currentProject.id}
@@ -534,14 +547,28 @@ export default function Projects() {
                     >
                       {/* Visual Mockup Device Showcase Frame */}
                       {currentProject.imagePreview && (
-                        <div className="relative w-full h-48 sm:h-56 rounded-xl overflow-hidden bg-slate-100/70 dark:bg-slate-950/80 border border-slate-200/80 dark:border-white/10 p-2 flex items-center justify-center shadow-xs group/preview">
+                        <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-100/70 dark:bg-slate-950/80 border border-slate-200/80 dark:border-white/10 flex items-center justify-center shadow-xs group/preview">
                           <Image
                             src={currentProject.imagePreview}
                             alt={currentProject.title}
                             fill
-                            sizes="(max-width: 1024px) 100vw, 420px"
-                            className="object-contain p-1.5 filter drop-shadow-xl group-hover/preview:scale-105 transition-transform duration-500"
+                            sizes="(max-width: 1024px) 100vw, 480px"
+                            className="object-contain filter drop-shadow-xl group-hover/preview:scale-105 transition-transform duration-500"
                           />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setLightboxImage({
+                                src: currentProject.imagePreview!,
+                                title: currentProject.title,
+                              })
+                            }
+                            aria-label={`View ${currentProject.title} fullscreen`}
+                            className="absolute bottom-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-900 text-white text-[11px] font-semibold backdrop-blur-sm border border-white/15 shadow-sm transition-all opacity-90 hover:opacity-100 cursor-pointer"
+                          >
+                            <Maximize2 size={12} />
+                            <span>Fullscreen</span>
+                          </button>
                         </div>
                       )}
 
@@ -744,21 +771,23 @@ export default function Projects() {
               </div>
 
               {/* Technologies */}
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
-                  Technologies Used
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {activeModalProject.tech.map((t) => (
-                    <span
-                      key={t}
-                      className="px-3 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
-                    >
-                      {t}
-                    </span>
-                  ))}
+              {activeModalProject.tech.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
+                    Technologies Used
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {activeModalProject.tech.map((t) => (
+                      <span
+                        key={t}
+                        className="px-3 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Modal CTAs */}
               <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
@@ -807,6 +836,48 @@ export default function Projects() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Fullscreen Image Lightbox */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {lightboxImage && (
+              <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-8">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setLightboxImage(null)}
+                  className="absolute inset-0 bg-slate-950/85 backdrop-blur-md"
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                  className="relative z-10 w-full max-w-6xl aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-white/15 shadow-2xl"
+                >
+                  <Image
+                    src={lightboxImage.src}
+                    alt={lightboxImage.title}
+                    fill
+                    sizes="100vw"
+                    className="object-contain"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setLightboxImage(null)}
+                    aria-label="Close fullscreen preview"
+                    className="absolute top-3 right-3 z-20 p-2 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white border border-white/15 shadow-md transition-colors cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </div>
   );
 }
