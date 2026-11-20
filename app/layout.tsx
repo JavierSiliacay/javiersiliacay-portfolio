@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://javiersiliacay-portfolio.siliacay-javier.workers.dev"),
+  metadataBase: new URL("https://portfolio.siliacay-javier.workers.dev"),
   title: "Javier Siliacay | Software Developer & AI Engineer",
   description: "Portfolio of Javier Siliacay — Software Developer & AI Engineer. Architecting high-performance full-stack web applications, computer vision systems, and intelligent IoT solutions.",
   alternates: {
@@ -38,11 +38,11 @@ export const metadata: Metadata = {
     "Autoworx",
     "Philippines"
   ],
-  authors: [{ name: "Javier Siliacay", url: "https://javiersiliacay-portfolio.siliacay-javier.workers.dev" }],
+  authors: [{ name: "Javier Siliacay", url: "https://portfolio.siliacay-javier.workers.dev" }],
   openGraph: {
     title: "Javier Siliacay | Software Developer & AI Engineer",
     description: "Building intelligent systems that bridge full-stack web platforms, machine learning, and hardware telemetry.",
-    url: "https://javiersiliacay-portfolio.siliacay-javier.workers.dev",
+    url: "https://portfolio.siliacay-javier.workers.dev",
     siteName: "Javier Siliacay Portfolio",
     type: "website",
     locale: "en_US",
@@ -95,8 +95,8 @@ export default function RootLayout({
               "@type": "Person",
               name: "Javier Siliacay",
               jobTitle: "Software Developer & AI Engineer",
-              url: "https://javiersiliacay-portfolio.siliacay-javier.workers.dev",
-              image: "https://javiersiliacay-portfolio.siliacay-javier.workers.dev/javier.png",
+              url: "https://portfolio.siliacay-javier.workers.dev",
+              image: "https://portfolio.siliacay-javier.workers.dev/javier.png",
               description:
                 "Software Developer & AI Engineer architecting high-performance full-stack web applications, computer vision systems, and intelligent IoT solutions.",
             }),
