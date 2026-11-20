@@ -15,8 +15,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://javiersiliacay-portfolio.siliacay-javier.workers.dev"),
   title: "Javier Siliacay | Software Developer & AI Engineer",
   description: "Portfolio of Javier Siliacay — Software Developer & AI Engineer. Architecting high-performance full-stack web applications, computer vision systems, and intelligent IoT solutions.",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   keywords: [
     "Javier Siliacay",
     "Software Developer",
@@ -30,12 +38,31 @@ export const metadata: Metadata = {
     "Autoworx",
     "Philippines"
   ],
-  authors: [{ name: "Javier Siliacay" }],
+  authors: [{ name: "Javier Siliacay", url: "https://javiersiliacay-portfolio.siliacay-javier.workers.dev" }],
   openGraph: {
     title: "Javier Siliacay | Software Developer & AI Engineer",
     description: "Building intelligent systems that bridge full-stack web platforms, machine learning, and hardware telemetry.",
+    url: "https://javiersiliacay-portfolio.siliacay-javier.workers.dev",
+    siteName: "Javier Siliacay Portfolio",
     type: "website",
     locale: "en_US",
+    images: [
+      {
+        url: "/javier.png",
+        width: 800,
+        height: 800,
+        alt: "Javier Siliacay — Software Developer & AI Engineer",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Javier Siliacay | Software Developer & AI Engineer",
+    description: "Building intelligent systems that bridge full-stack web platforms, machine learning, and hardware telemetry.",
+    images: ["/javier.png"],
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
   icons: {
     icon: [
@@ -60,6 +87,21 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/javier.png" type="image/png" />
         <link rel="apple-touch-icon" href="/javier.png" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: "Javier Siliacay",
+              jobTitle: "Software Developer & AI Engineer",
+              url: "https://javiersiliacay-portfolio.siliacay-javier.workers.dev",
+              image: "https://javiersiliacay-portfolio.siliacay-javier.workers.dev/javier.png",
+              description:
+                "Software Developer & AI Engineer architecting high-performance full-stack web applications, computer vision systems, and intelligent IoT solutions.",
+            }),
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
